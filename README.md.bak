@@ -15,5 +15,5 @@ The API uses EntityFramework. To add a migration:
 
 - Update the models and ApplicationDbContext.
 - Add migration: `dotnet ef migrations add MigrationName`
-- Run migration: `dotnet ef database update`
+- Run migration: dotnet ef database update
 

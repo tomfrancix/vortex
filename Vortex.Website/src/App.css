@@ -36,3 +36,14 @@
     transform: rotate(360deg);
   }
 }
+
+.website-icon {
+  width:40px;
+  margin-right:10px;
+}
+
+.project-tab {
+  padding-left:5px;
+  padding-right:5px;
+  margin-left:-1px;
+}

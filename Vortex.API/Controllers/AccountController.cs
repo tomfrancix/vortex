@@ -1,25 +1,33 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
+using Vortex.API.Data;
 using Vortex.API.Models;
+using Vortex.API.Services;
 using Vortex.API.ViewModels;
 
 namespace Vortex.API.Controllers
 {
+    [EnableCors("AllowSpecificOrigin")]
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly SignInManager<ApplicationUser> SignInManager;
+        private readonly TokenService TokenService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            TokenService = tokenService;
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
@@ -39,7 +47,7 @@ namespace Vortex.API.Controllers
                 {
                     await SignInManager.SignInAsync(user, isPersistent: false);
 
-                    return Ok(new { Message = "User registered successfully" });
+                    return Ok(GetUserDescriptor(user));
                 }
 
                 foreach (var error in result.Errors)
@@ -53,6 +61,7 @@ namespace Vortex.API.Controllers
             return BadRequest(ModelState);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
@@ -66,18 +75,18 @@ namespace Vortex.API.Controllers
 
                     if (result.Succeeded)
                     {
-                        return Ok(new { Message = "User logged in successfully" });
+                        return Ok(GetUserDescriptor(user));
                     }
                     else
                     {
                         ModelState.AddModelError(string.Empty, "Invalid login attempt");
-                        return BadRequest(ModelState);
+                        return Unauthorized(ModelState);
                     }
                 }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt");
-                    return BadRequest(ModelState);
+                    return Unauthorized(ModelState);
                 }
             }
 
@@ -85,10 +94,23 @@ namespace Vortex.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("profile")]
-        public async Task<IActionResult> UserProfile()
+        [HttpGet("get-current-user")]
+        public async Task<ActionResult<UserDescriptor>> GetCurrentUser()
         {
-            return Ok(new { UserName = User.Identity.Name });
+            var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            
+            return GetUserDescriptor(user);
+        }
+
+        private UserDescriptor GetUserDescriptor(ApplicationUser user)
+        {
+            return new UserDescriptor
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserName = user.UserName,
+                Token = TokenService.CreateToken(user)
+            };
         }
     }
 }

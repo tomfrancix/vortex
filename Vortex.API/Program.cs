@@ -1,34 +1,22 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Identity.Web;
-using Vortex.API.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Vortex.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Set the default culture for design-time context
 var culture = new System.Globalization.CultureInfo("en-US");
-System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+Thread.CurrentThread.CurrentCulture = culture;
+Thread.CurrentThread.CurrentUICulture = culture;
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddControllers(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CoreDatabaseConnection"));
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
-    {
-        // Configure identity options if needed
-    })
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -41,7 +29,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(builder =>
+{
+    builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5000").AllowCredentials();
+});
 
 app.UseAuthentication();
 

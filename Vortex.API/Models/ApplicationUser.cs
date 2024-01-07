@@ -7,6 +7,15 @@ namespace Vortex.API.Models
     /// </summary>
     public class ApplicationUser : IdentityUser
     {
+        public ApplicationUser()
+        {
+            CreatedCompanies = new List<Company>();
+            UserCompanies = new List<UserCompany>();
+            CreatedProjects = new List<Project>();
+            CreatedTasks = new List<TaskItem>();
+            Comments = new List<Comment>();
+        }
+
         /// <summary>
         /// The users first name.
         /// </summary>

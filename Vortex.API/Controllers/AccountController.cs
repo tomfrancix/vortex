@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web.Resource;
 using Vortex.API.Data;
 using Vortex.API.Models;
@@ -19,12 +20,14 @@ namespace Vortex.API.Controllers
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly SignInManager<ApplicationUser> SignInManager;
         private readonly TokenService TokenService;
+        private readonly ApplicationDbContext Context;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService, ApplicationDbContext context)
         {
             UserManager = userManager;
             SignInManager = signInManager;
             TokenService = tokenService;
+            Context = context;
         }
 
         [AllowAnonymous]
@@ -98,19 +101,45 @@ namespace Vortex.API.Controllers
         public async Task<ActionResult<UserDescriptor>> GetCurrentUser()
         {
             var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+
+            var userModel = Context.Users
+                .Include(applicationUser => applicationUser.UserCompanies)
+                .ThenInclude(userCompanies => userCompanies.Company)
+                .FirstOrDefault(u => u.Id == user.Id);
+
+            user.UserCompanies = userModel.UserCompanies;
             
             return GetUserDescriptor(user);
         }
 
         private UserDescriptor GetUserDescriptor(ApplicationUser user)
         {
-            return new UserDescriptor
+            var model = new UserDescriptor
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 UserName = user.UserName,
-                Token = TokenService.CreateToken(user)
+                Token = TokenService.CreateToken(user),
+                UserCompanies = new List<CompanyDescriptor>()
             };
+
+            var userModel = Context.Users
+                .Include(applicationUser => applicationUser.UserCompanies)
+                .ThenInclude(userCompanies => userCompanies.Company)
+                .FirstOrDefault(u => u.Id == user.Id);
+
+
+            foreach (var company in userModel.UserCompanies)
+            {
+                model.UserCompanies.Add(new CompanyDescriptor
+                {
+                    CompanyId = company.CompanyId,
+                    Name = company.Company.Name,
+                    UserId = company.UserId
+                });
+            }
+
+            return model;
         }
     }
 }

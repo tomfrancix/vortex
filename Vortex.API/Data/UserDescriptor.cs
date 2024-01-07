@@ -36,7 +36,7 @@ namespace Vortex.API.Data
         /// <summary>
         /// Companies the user si associated with.
         /// </summary>
-        public ICollection<UserCompany> UserCompanies { get; set; }
+        public ICollection<CompanyDescriptor> UserCompanies { get; set; }
 
         /// <summary>
         /// Projects created by the user.

@@ -9,7 +9,7 @@ const InputField = ({ type, id, name, formik }) => {
         id={id}
         name={name}
         onChange={formik.handleChange}
-        value={formik.values.email}
+        value={formik.values[name]}
         className="form-control form-control-lg"
         placeholder={`Enter your ${name}...`}
         />

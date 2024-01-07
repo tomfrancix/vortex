@@ -21,8 +21,9 @@ const LandingPage = ({setUser, websiteData}) => {
         if (response.ok) {
         const data = await response.json();
         localStorage.setItem('accessToken', data.token);
+        data.isLoggedIn = true;
         console.log(data);
-        setUser(prevUser => ({ ...prevUser, isLoggedIn: true }));
+        setUser(data);
         } else {
         console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
         }
@@ -49,7 +50,7 @@ const LandingPage = ({setUser, websiteData}) => {
 
     return (
     <div>
-        <Header websiteData={websiteData} />
+        <Header websiteData={websiteData} authenticated={false} />
         <section className="py-4 text-center container-fluid bg-dark text-light">
             <div className="row py-lg-5">
             <div className="col-lg-7 col-md-12 col-sm-12 mx-auto">

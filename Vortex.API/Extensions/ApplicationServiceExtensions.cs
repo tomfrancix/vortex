@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Vortex.API.Interfaces;
 using Vortex.API.Models;
 using Vortex.API.Services;
 
@@ -52,6 +54,14 @@ namespace Vortex.API.Extensions
                 });
 
             services.AddScoped<TokenService>();
+
+            services.AddTransient<ICullingService, CullingService>();
+
+            services.AddControllersWithViews()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                });
 
             return services;
         }

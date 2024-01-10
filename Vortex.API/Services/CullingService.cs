@@ -48,9 +48,22 @@ namespace Vortex.API.Services
         public async Task<int> DeleteTask(int id)
         {
             var entity = await Context.Tasks
+                .Include(c => c.Steps)
                 .FirstOrDefaultAsync(c => c.TaskItemId == id);
 
+            Context.Steps.RemoveRange(entity.Steps);
+
             Context.Tasks.Remove(entity);
+
+            return await Context.SaveChangesAsync();
+        }
+
+        public async Task<int> DeleteStep(int id)
+        {
+            var entity = await Context.Steps
+                .FirstOrDefaultAsync(c => c.StepId == id);
+
+            Context.Steps.Remove(entity);
 
             return await Context.SaveChangesAsync();
         }

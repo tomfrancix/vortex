@@ -5,8 +5,9 @@ import InputField from '../auth/InputField';
 const CreateCompany = ({user, setCompany}) => {
 
     const token = localStorage.getItem('accessToken');
-    const createNewCompany = async (url, formData) => {
-        console.log(formData)
+
+    const createCompany = async (formData) => {
+        var url = '/api/Company/new';
         try {
             const response = await fetch(url, {
             method: 'POST',
@@ -30,17 +31,12 @@ const CreateCompany = ({user, setCompany}) => {
         }
     };
 
-    const createCompany = async (formData) => {
-        await createNewCompany('/api/Company/new', formData);
-    };
-
     const formik = useFormik({
         initialValues: {
             name: ''
         },
         onSubmit: values => {
             console.log(values)
-            // Call the onLogin callback with the form values
             createCompany(values);
         },
     });
@@ -56,23 +52,19 @@ const CreateCompany = ({user, setCompany}) => {
                             <section className="gradient-custom">
                                     <div className="container-fluid">
                                         <div className="row d-flex justify-content-center align-items-center">
-                                        <div className="col-12">
-                                            <div className="card bg-light">
-                                            <div className="card-body p-3 text-center">
-
-                                                <div className="md-3 mt-md-1">
-
-                                                <h2 className="fw-bold mb-3">Create Collaboration Group</h2>
-
-                                                <form onSubmit={formik.handleSubmit}>
-                                                    <InputField type="text" id="name" name="name" formik={formik} />
-                                                    <button type="submit" className="btn btn-primary">Create</button>
-                                                </form>
-
+                                            <div className="col-12">
+                                                <div className="card bg-light">
+                                                    <div className="card-body p-3 text-center">
+                                                        <div className="md-3 mt-md-1">
+                                                            <h2 className="fw-bold mb-3">Create Collaboration Group</h2>
+                                                            <form onSubmit={formik.handleSubmit}>
+                                                                <InputField type="text" id="name" name="name" formik={formik} />
+                                                                <button type="submit" className="btn btn-primary">Create</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            </div>
-                                        </div>
                                         </div>
                                     </div>
                                 </section>

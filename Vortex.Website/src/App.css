@@ -30,3 +30,11 @@
 #sidebar {
   font-size: 0.8rem !important;
 }
+
+.nav-link.active {
+  background-color:grey !important;
+}
+
+.inline-block {
+  display: inline-block;
+}

@@ -3,18 +3,18 @@
 namespace Vortex.API.Data;
 
 /// <summary>
-/// The task.
+/// The step.
 /// </summary>
-public class CreateTaskItemDescriptor
+public class CreateStepDescriptor
 {
 
     /// <summary>
     /// The name.
     /// </summary>
-    public string Name { get; set; }
+    public string Content { get; set; }
 
     /// <summary>
-    /// The project id.
+    /// The task id.
     /// </summary>
-    public int ProjectId { get; set; }
+    public int TaskItemId { get; set; }
 }

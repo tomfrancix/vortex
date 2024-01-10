@@ -28,7 +28,7 @@ public class Company
     /// <summary>
     /// Users associated with the company.
     /// </summary>
-    public ICollection<ApplicationUser> Users { get; set; }
+    public ICollection<ApplicationUser> Collaborators { get; set; }
 
     /// <summary>
     /// Projects belonging to the company.

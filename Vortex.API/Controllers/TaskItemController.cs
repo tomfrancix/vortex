@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vortex.API.Data;
+using Vortex.API.Enum;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
+using System.Security.Claims;
 
 namespace Vortex.API.Controllers
 {
@@ -27,24 +29,26 @@ namespace Vortex.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var project = Context.Projects.Include(c => c.Tasks).FirstOrDefault(c => c.ProjectId == model.ProjectId);
+                var project = Context.Projects.Include(c => c.Tasks).ThenInclude(c => c.Steps).FirstOrDefault(c => c.ProjectId == model.ProjectId);
 
-                var taskItem = new TaskItem()
+                var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+
+                var taskItem = new TaskItem
                 {
-                    Summary = model.Name
+                    Summary = model.Name,
+                    Description = "",
+                    Creator = user.UserName,
+                    Owner = "",
+                    Status = TaskItemStatus.Requested,
+                    ProjectId = project.ProjectId,
+                    Project = project
+
                 };
 
                 project.Tasks.Add(taskItem);
+                await Context.SaveChangesAsync();
 
-                var result = await Context.SaveChangesAsync();
-
-                if (result > 0)
-                {
-                    return Ok(taskItem);
-                }
-
-                ModelState.AddModelError(string.Empty, "Failed to create the TaskItem.");
-                return BadRequest(ModelState);;
+                return Ok(taskItem);
             }
 
             return BadRequest(ModelState);
@@ -85,6 +89,39 @@ namespace Vortex.API.Controllers
                 else
                 {
                     // User not found
+                    return NotFound();
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("edit")]
+        public async Task<IActionResult> Edit([FromBody] EditTaskDescriptor model)
+        {
+            if (ModelState.IsValid)
+            {
+                var taskItem = Context.Tasks.Find(model.TaskItemId);
+
+                if (taskItem != null)
+                {
+                    switch (model.Field)
+                    {
+                        case "summary": 
+                            taskItem.Summary = model.Value;
+                            break;
+                        case "description": 
+                            taskItem.Description = model.Value;
+                            break;
+                    }
+
+                    await Context.SaveChangesAsync();
+
+                    return Ok(taskItem);
+                }
+                else
+                {
+                    // Not found
                     return NotFound();
                 }
             }

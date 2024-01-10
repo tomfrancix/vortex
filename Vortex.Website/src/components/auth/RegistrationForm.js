@@ -37,6 +37,7 @@ const RegistrationForm = ({ onRegister, switchToLoginForm }) => {
                     <InputField type="email" id="registerEmail" name="email" formik={formik} />
                     <InputField type="text" id="username" name="username" formik={formik} />
                     <InputField type="password" id="registerPassword" name="password" formik={formik} />
+                    <InputField type="password" id="confirmPassword" name="confirmPassword" formik={formik} />
 
                     <button type="submit" className="btn btn-primary">Login</button>
 

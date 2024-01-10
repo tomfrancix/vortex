@@ -35,7 +35,7 @@ namespace Vortex.API.Controllers
                 {
                     Name = name,
                     User = user,
-                    Users = new List<ApplicationUser> { user },
+                    Collaborators = new List<ApplicationUser> { user },
                     UserCompanies = new List<UserCompany>{new UserCompany
                         {
                             User = user

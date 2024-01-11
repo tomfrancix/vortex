@@ -38,3 +38,41 @@
 .inline-block {
   display: inline-block;
 }
+
+.fs-7{
+  font-size:8pt;
+}
+
+.pill-Requested {
+  background-color: hotpink;
+}
+.pill-InProgress {
+  background-color: deepskyblue;
+}
+.pill-ForReview {
+  background-color: orange;
+}
+.pill-Completed {
+  background-color: chartreuse;
+}
+.pill-Archived {
+  background-color: white;
+}
+  
+
+.tab-pane#Requested .card {
+  border:1px solid hotpink;
+}
+.tab-pane#InProgress .card {
+  border:1px solid deepskyblue;
+}
+.tab-pane#ForReview .card {
+  border:1px solid orange;
+}
+.tab-pane#Completed .card {
+  border:1px solid chartreuse;
+}
+.tab-pane#Archived .card {
+  border:1px solid white;
+  color:black;
+}

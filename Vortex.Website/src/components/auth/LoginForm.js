@@ -25,21 +25,20 @@ const LoginForm = ({ onLogin, switchToRegisterForm }) => {
 
                 <div className="md-3 mt-md-1">
 
-                  <h2 className="fw-bold mb-3 text-uppercase">Login</h2>
-                  <p className="text-dark-50 mb-3">Please enter your login and password!</p>
+                  <h2 className="fw-bold mb-3 fs-5">Login to your account</h2>
 
                   <form onSubmit={formik.handleSubmit}>
-                    <InputField type="email" id="loginEmail" name="email" formik={formik} />
-                    <InputField type="password" id="loginPassword" name="password" formik={formik} />
+                    <InputField type="email" id="loginEmail" name="email" formik={formik}  placeholder="Enter your email..."/>
+                    <InputField type="password" id="loginPassword" name="password" formik={formik}  placeholder="Enter your password..."/>
                     <button type="submit" className="btn btn-primary">Login</button>
 
                   </form>
 
                   <div>
-                    <p className="mt-5">
+                    <p className="mt-5 fs-6" >
                       Don't have an account? 
                       <a href="#"
-                          className="text-dark-50 fw-bold"
+                          className="text-dark-50 fw-bold p-1"
                           onClick={switchToRegisterForm}>
                         Sign Up
                       </a>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}) => {
     const token = localStorage.getItem('accessToken');
@@ -60,6 +62,7 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
         if (response.ok) {
             const project = await response.json();
             project.tasks = [];
+            setTask(null)
             setProject(project);
             displayNewProjectForm(false)
         } else {
@@ -131,8 +134,14 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
                 </form>
             ) : (
                 <>
-                <button type="submit"  onClick={() => displayNewProjectForm(true)} className="card bg-dark text-light border-secondary p-2 w-100 mb-2" >
-                Add Project
+                <button type="submit"  
+                    onClick={() => displayNewProjectForm(true)} 
+                    className="card bg-dark text-light border-secondary p-2 w-100 mb-2"
+                    style={{border:"1px dashed grey", flexDirection:"row"}} >
+                    <div>
+                        <FontAwesomeIcon icon={faPlus} />
+                    </div>
+                    <span className="px-2">Add Project</span>
                 </button>
                 </>
             )
@@ -147,13 +156,13 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
                     currentProject != null && currentProject.projectId == project.projectId ? (
                     
                     <div className="input-group w-100">
-                        <div className="btn card flex-fill bg-success btn-sm text-light border-secondary p-2 mb-2" >{currentProject.name}</div>
+                        <div className="btn card flex-fill bg-secondary btn-sm text-light border-secondary p-2 mb-2" style={{textAlign:"left"}}>{currentProject.name}</div>
                         <button className="btn btn-danger btn-sm p-2 mb-2"  type="submit" onClick={() => deleteProject(currentProject.projectId)}>X</button>
                     </div>
                     ) : 
                 (
                     <div className="input-group w-100">
-                    <button className="card bg-dark flex-fill text-light border-secondary p-2 mb-2"
+                    <button className="card bg-dark flex-fill text-light border-secondary p-2 mb-2" 
                         onClick={() => selectProject(project.projectId)}>
                         {project.name}
                     </button>

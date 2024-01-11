@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Tasks from './Tasks';
 import Task from './Task';
 import { useFormik } from 'formik';
+import TaskStatusEnum, { TaskStatusValues } from '../enum/TaskStatusEnum';
 
 const Project = ({project, setProject, currentTask, setTask}) => {
   
@@ -18,21 +19,14 @@ const Project = ({project, setProject, currentTask, setTask}) => {
                 {/* The list of tasks. */}
                 <div className="col-6">
                 <ul className="nav nav-pills d-flex flex-row pb-3" style={{fontSize:"8pt"}}>
-                  <li className="nav-item flex-grow-1 text-center">
-                    <a className="nav-link text-light p-1 active" data-bs-toggle="pill" href="#requested">Requested</a>
-                  </li>
-                  <li className="nav-item  flex-grow-1 text-center">
-                    <a className="nav-link text-light p-1" data-bs-toggle="pill" href="#inProgress">In Progress</a>
-                  </li>
-                  <li className="nav-item  flex-grow-1 text-center">
-                    <a className="nav-link text-light p-1" data-bs-toggle="pill" href="#forReview">Pending Review</a>
-                  </li>
-                  <li className="nav-item  flex-grow-1 text-center">
-                    <a className="nav-link text-light p-1" data-bs-toggle="pill" href="#completed">Completed</a>
-                  </li>
-                  <li className="nav-item  flex-grow-1 text-center">
-                    <a className="nav-link text-light p-1" data-bs-toggle="pill" href="#archived">Archived</a>
-                  </li>
+                {TaskStatusValues.map((status, index) => (
+                    <React.Fragment key={status}>
+                      <li className="nav-item flex-grow-1 text-center">
+                        <a className="nav-link text-light p-1 mb-1" data-bs-toggle="pill" href={`#${TaskStatusValues[index].replace(" ", "")}`}>{TaskStatusValues[index]}</a>
+                        <div className={`badge fs-7 pill-${TaskStatusValues[index].replace(" ", "")} text-dark`}>{project?.tasks?.filter(task => task.status === index).length}</div>
+                      </li>                     
+                    </React.Fragment>
+                  ))}
                 </ul>
                   <Tasks project={project} setProject={setProject} setTask={setTask} currentTask={currentTask} />
                 </div>
@@ -44,7 +38,6 @@ const Project = ({project, setProject, currentTask, setTask}) => {
                     ) : (<></>)
                   }
                 </div>
-
               </div>
             </div>
           </div>

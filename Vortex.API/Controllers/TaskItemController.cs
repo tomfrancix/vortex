@@ -59,7 +59,9 @@ namespace Vortex.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var tasks = Context.Tasks.Where(i => i.ProjectId == projectId);
+                var tasks = Context.Tasks
+                    .Include(task => task.Steps)
+                    .Where(i => i.ProjectId == projectId);
 
                 if (tasks != null)
                 {
@@ -112,6 +114,9 @@ namespace Vortex.API.Controllers
                             break;
                         case "description": 
                             taskItem.Description = model.Value;
+                            break;
+                        case "status":
+                            taskItem.Status = (TaskItemStatus)Convert.ToInt16(model.Value);
                             break;
                     }
 

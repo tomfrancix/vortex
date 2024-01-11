@@ -2,15 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import UseEnhancedLogger from '../debug/EnhancedLogger';
+import TaskStatusEnum, { TaskStatusValues } from '../enum/TaskStatusEnum';
 
 const Tasks = ( {project, setTask, setProject, currentTask} ) => {
+const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
   
   const [newTaskFormIsVisible, displayNewTaskForm] = useState(false);
   const inputRef = useRef(null); 
 
   useEffect(() => {
     const fetchTasks = async () => {
-      console.log("Getting tasks for project...");
+      info("function: fetchTasks");
       try {
         const response = await fetch('/api/TaskItem/list', {
           method: 'POST',
@@ -24,20 +27,27 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
   
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
+          info(data);
   
           setProject((prevProject) => {
+            var tasks = [];
+
+            data.forEach((task) => {
+              console.log(task);
+              task.steps= task.steps?.$values;
+              tasks.push(task);
+            })
             // Use the previous state to ensure you're updating based on the current state
-            const updatedProject = { ...prevProject, tasks: data };
-            console.log("Setting project...");
-            console.log(updatedProject);
+            const updatedProject = { ...prevProject, tasks: tasks };
+            info("Setting project...");
+            info(updatedProject);
             return updatedProject;
           });
         } else {
-          console.error('Failed to fetch tasks:', response.statusText);
+          error('Failed to fetch tasks:', response.statusText);
         }
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        error('Error fetching tasks:', error);
       }
     };
   
@@ -50,6 +60,7 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
   }, [newTaskFormIsVisible, currentTask, project.projectId]);
 
   const createTask = async (formData) => {
+    info("function: createTask");
     var url = '/api/taskitem/new';
 
     try {
@@ -74,18 +85,18 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
 
           const updatedProject = { ...prevProject, tasks: updatedTasks };
 
-          console.log("updatedProject");
-          console.log(updatedProject);
+          info("updatedProject");
+          info(updatedProject);
           return updatedProject;
         });
 
         formik.resetForm();
 
       } else {
-        console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+        error(`Failed to ${url.split('/').pop()}:`, response.statusText);
       }
     } catch (error) {
-      console.error(`Error ${url.split('/').pop()}:`, error);
+      error(`Error ${url.split('/').pop()}:`, error);
     }
   };
 
@@ -99,8 +110,6 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
       },
   });
 
-  console.log("project.tasks");
-  console.log(project.tasks);
   return (
     <div>
 
@@ -128,11 +137,12 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
             type="submit"
             onClick={() => displayNewTaskForm(true)}
             className="card bg-dark text-light p-2 px-3 w-100 mb-2 d-flex"
+            style={{flexDirection:"row", border:"1px dashed grey"}}
           >
-            <div className="inline-block">
+            <div>
               <FontAwesomeIcon icon={faPlus} />
             </div>
-            <div className="inline-block">Add Task</div>
+            <div className="px-2">Add Task</div>
           </button>
           </>
         )
@@ -142,28 +152,32 @@ const Tasks = ( {project, setTask, setProject, currentTask} ) => {
 
       {/** The list of existing tasks. This is where they should render after setProject()*/}
       <div className="tab-content">
-        <div className="tab-pane active" id="requested">
-        {project?.tasks?.slice().reverse().map((task, index) => (
-          <>
-          {
-            task?.taskItemId == currentTask?.taskItemId ? (
-              <div key={task.taskItemId}  type="submit" className="card bg-success text-light p-2 px-3 w-100 mb-2" >
-                {task.taskItemId} {task.summary}
-              </div>
-            ) : (
-              <button key={task.taskItemId}  type="submit" className="card bg-dark text-light p-2 px-3 w-100 mb-2"  onClick={() => setTask(task)}>
-                {task.taskItemId} {task.summary}
-              </button>
-            )
-          }
-          </>
-          ))
-        }
-        </div>
-        <div className="tab-pane container fade" id="inProgress">...</div>
-        <div className="tab-pane container fade" id="forReview">...</div>
-        <div className="tab-pane container fade" id="completed">...</div>
-        <div className="tab-pane container fade" id="archived">...</div>
+      {TaskStatusValues.map((status, index) => (
+          <React.Fragment key={status}>
+            <div className="tab-pane" id={`${TaskStatusValues[index].replace(" ", "")}`}>
+              {project
+              ?.tasks
+              ?.filter(task => task.status === index)
+              .slice().reverse().map((task, taskIndex) => (
+              <React.Fragment key={task.taskItemId}>
+              {
+                task?.taskItemId == currentTask?.taskItemId ? (
+                  <div type="submit" className="card text-light bg-secondary p-2 px-3 w-100 mb-2" >
+                    {task.summary}
+                  </div>
+                ) : (
+                  <button type="submit" className="card bg-dark text-light p-2 px-3 w-100 mb-2" onClick={() => setTask(task)}>
+                    {task.summary}
+                  </button>
+                )
+              }
+              </React.Fragment>
+              ))
+            }
+            </div>
+            
+          </React.Fragment>
+        ))}
       </div>
       
     </div>

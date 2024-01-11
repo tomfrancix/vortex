@@ -3,15 +3,52 @@ import { useFormik } from 'formik';
 import ProjectLinks from './menu/ProjectLinks';
 import UserManagerLinks from './menu/UserManagerLinks';
 import Project from './Project';
+import UseEnhancedLogger from '../debug/EnhancedLogger';
 
 const Company = ({company, setCompany}) => {
+    
+  const { debug, info, warn, error } = UseEnhancedLogger('Company');
 
     const [project, setProject] = useState(null);
     const [collaborator, setCollaborator] = useState(null);
     const [currentTask, setCurrentTask] = useState(null);
 
+    const fetchSteps = async () => {
+      console.log("------------Getting steps for project...");
+      try {
+        const response = await fetch('/api/Step/list', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: currentTask.taskItemId
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          console.log({
+            "Fetch steps response data": data
+          });
+  
+          setCurrentTask((prevTask) => {
+            // Use the previous state to ensure you're updating based on the current state
+            const updatedTask = { ...prevTask, steps: data };
+            info("Setting task...");
+            info(updatedTask);
+            return updatedTask;
+          });
+        } else {
+          error('Failed to fetch tasks:', response.statusText);
+        }
+      } catch (error) {
+        error('Error fetching tasks:', error);
+      }
+    }
+
     const setTask = async(task) => {
-      setCurrentTask(task);
+      setCurrentTask(task)
     }
   
     return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -6,6 +6,24 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}) => {
     const token = localStorage.getItem('accessToken');
     const [newProjectFormIsVisible, displayNewProjectForm] = useState(false);
+
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+          // Check if the click is outside the form and if the form is visible
+          if (newProjectFormIsVisible && !event.target.closest('.form-project-container')) {
+            displayNewProjectForm(false);
+            formik.resetForm();
+          }
+        };
+    
+        // Attach event listener
+        document.addEventListener('click', handleOutsideClick);
+    
+        // Detach event listener on component unmount
+        return () => {
+          document.removeEventListener('click', handleOutsideClick);
+        };
+      }, [newProjectFormIsVisible]);
 
     const createProject = async (formData) => {
         var url = '/api/Project/new';
@@ -29,9 +47,9 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             displayNewProjectForm(false);
         
             setCompany((prevCompany) => {
-                const updatedProjects = [...prevCompany.projects.$values, data];
+                const updatedProjects = [...prevCompany.projects, data];
         
-                const updatedCompany = { ...prevCompany, projects: { $values: updatedProjects } };
+                const updatedCompany = { ...prevCompany, projects: updatedProjects };
         
                 return updatedCompany;
             });
@@ -64,7 +82,8 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             project.tasks = [];
             setTask(null)
             setProject(project);
-            displayNewProjectForm(false)
+            displayNewProjectForm(false);
+            document.getElementById("statusRequested").click();
         } else {
             console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
         }
@@ -87,11 +106,11 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
         if (response.ok) {
         setProject(null);
         setCompany((prevCompany) => {
-            const updatedProjects = prevCompany.projects.$values.filter(
+            const updatedProjects = prevCompany.projects.filter(
             (project) => project.projectId !== id
             );
 
-            const updatedCompany = { ...prevCompany, projects: { $values: updatedProjects } };
+            const updatedCompany = { ...prevCompany, projects: updatedProjects };
     
             return updatedCompany;
         });
@@ -118,7 +137,7 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             {/*Render the option to create a new project.*/}
             {
             newProjectFormIsVisible ? (
-                <form onSubmit={formik.handleSubmit}>
+                <form onSubmit={formik.handleSubmit} className="form-project-container">
                     <div className="input-group mb-2 fs-6">
                     <input
                     type="text"
@@ -148,8 +167,8 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             }
 
             {/*Render the existing project links.*/}
-            {company.projects?.$values?.length > 0 ? (
-            company.projects?.$values.slice().reverse().map((project, i) => (
+            {company.projects?.length > 0 ? (
+            company.projects?.slice().reverse().map((project, i) => (
                 
                 <div className="col-12 mb-1" key={i}>
                 {           

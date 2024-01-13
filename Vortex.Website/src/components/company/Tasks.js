@@ -12,6 +12,24 @@ const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
   const inputRef = useRef(null); 
 
   useEffect(() => {
+    const handleOutsideClick = (event) => {
+      // Check if the click is outside the form and if the form is visible
+      if (newTaskFormIsVisible && !event.target.closest('.form-task-container')) {
+        displayNewTaskForm(false);
+        formik.resetForm();
+      }
+    };
+
+    // Attach event listener
+    document.addEventListener('click', handleOutsideClick);
+
+    // Detach event listener on component unmount
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, [newTaskFormIsVisible]);
+
+  useEffect(() => {
     const fetchTasks = async () => {
       info("function: fetchTasks");
       try {
@@ -31,17 +49,17 @@ const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
   
           setProject((prevProject) => {
             var tasks = [];
-
-            data.forEach((task) => {
-              console.log(task);
-              task.steps= task.steps?.$values;
-              tasks.push(task);
-            })
-            // Use the previous state to ensure you're updating based on the current state
-            const updatedProject = { ...prevProject, tasks: tasks };
-            info("Setting project...");
-            info(updatedProject);
-            return updatedProject;
+            if (data != undefined && data.length > 0) {
+              data.forEach((task) => {
+                console.log(task);
+                tasks.push(task);
+              })
+            }
+              // Use the previous state to ensure you're updating based on the current state
+              const updatedProject = { ...prevProject, tasks: tasks };
+              info("Setting project...");
+              info(updatedProject);
+              return updatedProject;
           });
         } else {
           error('Failed to fetch tasks:', response.statusText);
@@ -90,6 +108,8 @@ const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
           return updatedProject;
         });
 
+        displayNewTaskForm(true);
+
         formik.resetForm();
 
       } else {
@@ -116,7 +136,7 @@ const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
       {/** The form for creating a new task. */}
       {
         newTaskFormIsVisible ? (
-          <form onSubmit={formik.handleSubmit}>
+          <form onSubmit={formik.handleSubmit} className="form-task-container">
               <div className="input-group mb-2 fs-6 text-light">
                 <input
                 ref={inputRef} 
@@ -162,11 +182,11 @@ const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
               <React.Fragment key={task.taskItemId}>
               {
                 task?.taskItemId == currentTask?.taskItemId ? (
-                  <div type="submit" className="card text-light bg-secondary p-2 px-3 w-100 mb-2" >
+                  <div type="submit" className="card text-light bg-dark-medium p-2 px-3 w-100 mb-2" style={{textAlign:"left"}} >
                     {task.summary}
                   </div>
                 ) : (
-                  <button type="submit" className="card bg-dark text-light p-2 px-3 w-100 mb-2" onClick={() => setTask(task)}>
+                  <button type="submit" className="card bg-dark text-light p-2 px-3 w-100 mb-2"  style={{textAlign:"left"}} onClick={() => setTask(task)}>
                     {task.summary}
                   </button>
                 )

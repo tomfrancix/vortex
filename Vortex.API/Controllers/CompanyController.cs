@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Vortex.API.Interfaces;
 using Vortex.API.Models;
 using Vortex.API.ViewModels;
+using Vortex.API.Mappers;
 
 namespace Vortex.API.Controllers
 {
@@ -16,12 +17,16 @@ namespace Vortex.API.Controllers
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
+        private readonly CompanyMapper CompanyMapper;
+        private readonly UserMapper UserMapper;
 
-        public CompanyController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService)
+        public CompanyController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, CompanyMapper companyMapper, UserMapper userMapper)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
+            CompanyMapper = companyMapper;
+            UserMapper = userMapper;
         }
 
         [HttpPost("new")]
@@ -49,7 +54,7 @@ namespace Vortex.API.Controllers
 
                 if (result > 0)
                 {
-                    return Ok(company);
+                    return Ok(CompanyMapper.Map(company));
                 }
 
                 ModelState.AddModelError(string.Empty, "Failed to create the company.");
@@ -77,13 +82,23 @@ namespace Vortex.API.Controllers
                         .Collection(u => u.Projects)
                         .LoadAsync();
 
-                    return Ok(company);
+                    var viewModel = CompanyMapper.Map(company);
+
+                    if (company.UserCompanies is { Count: > 0 })
+                    {
+                        foreach (var companyUser in company.UserCompanies)
+                        {
+                            var user = Context.Users.Find(companyUser.UserId);
+
+                            viewModel.Users.Add(UserMapper.Map(user));
+                        }
+                    }
+
+                    return Ok(viewModel);
                 }
-                else
-                {
-                    // User not found
-                    return NotFound();
-                }
+
+                // User not found
+                return NotFound();
             }
 
             return BadRequest(ModelState);

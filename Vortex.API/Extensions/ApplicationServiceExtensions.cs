@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Vortex.API.Interfaces;
+using Vortex.API.Mappers;
 using Vortex.API.Models;
 using Vortex.API.Services;
 
@@ -57,11 +58,14 @@ namespace Vortex.API.Extensions
 
             services.AddTransient<ICullingService, CullingService>();
 
-            services.AddControllersWithViews()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                });
+            services.AddControllersWithViews();
+
+            services.AddSingleton<UserMapper, UserMapper>();
+            services.AddSingleton<CompanyMapper, CompanyMapper>();
+            services.AddSingleton<ProjectMapper, ProjectMapper>();
+            services.AddSingleton<TaskMapper, TaskMapper>();
+            services.AddSingleton<StepMapper, StepMapper>();
+            services.AddSingleton<CommentMapper, CommentMapper>();
 
             return services;
         }

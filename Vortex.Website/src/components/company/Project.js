@@ -22,7 +22,7 @@ const Project = ({project, setProject, currentTask, setTask}) => {
                 {TaskStatusValues.map((status, index) => (
                     <React.Fragment key={status}>
                       <li className="nav-item flex-grow-1 text-center">
-                        <a className="nav-link text-light p-1 mb-1" data-bs-toggle="pill" href={`#${TaskStatusValues[index].replace(" ", "")}`}>{TaskStatusValues[index]}</a>
+                        <a className="nav-link text-light p-1 mb-1" data-bs-toggle="pill" id={`status${TaskStatusValues[index].replace(" ", "")}`} href={`#${TaskStatusValues[index].replace(" ", "")}`}>{TaskStatusValues[index]}</a>
                         <div className={`badge fs-7 pill-${TaskStatusValues[index].replace(" ", "")} text-dark`}>{project?.tasks?.filter(task => task.status === index).length}</div>
                       </li>                     
                     </React.Fragment>

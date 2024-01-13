@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Vortex.API.Data;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
+using Vortex.API.Mappers;
 
 namespace Vortex.API.Controllers
 {
@@ -14,12 +15,14 @@ namespace Vortex.API.Controllers
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
+        private readonly ProjectMapper ProjectMapper;
 
-        public ProjectController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService)
+        public ProjectController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, ProjectMapper projectMapper)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
+            ProjectMapper = projectMapper;
         }
 
         [HttpPost("new")]
@@ -40,7 +43,7 @@ namespace Vortex.API.Controllers
 
                 if (result > 0)
                 {
-                    return Ok(project);
+                    return Ok(ProjectMapper.Map(project));
                 }
 
                 ModelState.AddModelError(string.Empty, "Failed to create the Project.");
@@ -64,7 +67,7 @@ namespace Vortex.API.Controllers
                         .Collection(u => u.Tasks)
                         .LoadAsync();
 
-                    return Ok(project);
+                    return Ok(ProjectMapper.Map(project));
                 }
                 else
                 {

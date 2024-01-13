@@ -21,6 +21,8 @@ namespace Vortex.API.Services
                 .ThenInclude(p => p.Tasks)
                 .FirstOrDefaultAsync(c => c.CompanyId == id);
 
+            if (company is null) return 0;
+            
             foreach (var project in company.Projects)
             {
                 await DeleteProject(project.ProjectId);
@@ -38,6 +40,8 @@ namespace Vortex.API.Services
                 .Include(c => c.Tasks)
                 .FirstOrDefaultAsync(c => c.ProjectId == id);
 
+            if (entity is null) return 0;
+
             Context.Tasks.RemoveRange(entity.Tasks);
 
             Context.Projects.Remove(entity);
@@ -49,9 +53,13 @@ namespace Vortex.API.Services
         {
             var entity = await Context.Tasks
                 .Include(c => c.Steps)
+                .Include(c => c.Comments)
                 .FirstOrDefaultAsync(c => c.TaskItemId == id);
 
+            if (entity is null) return 0;
+
             Context.Steps.RemoveRange(entity.Steps);
+            Context.Comments.RemoveRange(entity.Comments);
 
             Context.Tasks.Remove(entity);
 
@@ -63,7 +71,21 @@ namespace Vortex.API.Services
             var entity = await Context.Steps
                 .FirstOrDefaultAsync(c => c.StepId == id);
 
+            if (entity is null) return 0;
+
             Context.Steps.Remove(entity);
+
+            return await Context.SaveChangesAsync();
+        }
+
+        public async Task<int> DeleteComment(int id)
+        {
+            var entity = await Context.Comments
+                .FirstOrDefaultAsync(c => c.CommentId == id);
+
+            if (entity is null) return 0;
+
+            Context.Comments.Remove(entity);
 
             return await Context.SaveChangesAsync();
         }

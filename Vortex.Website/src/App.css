@@ -76,3 +76,20 @@
   border:1px solid white;
   color:black;
 }
+
+.bg-dark-medium {
+  background-color:#454545;
+}
+
+.bg-black {
+  background-color:#181818 !important;
+}
+
+.deleteButton {
+  color:rgb(116, 116, 116);
+  border:1px dotted grey;
+}
+.deleteButton:hover {
+  color:red;
+  cursor:pointer;
+}

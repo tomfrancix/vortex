@@ -6,6 +6,9 @@ using Vortex.API.Enum;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
 using System.Security.Claims;
+using Vortex.API.Mappers;
+using Vortex.API.ViewModels;
+using System.Threading.Tasks;
 
 namespace Vortex.API.Controllers
 {
@@ -16,12 +19,14 @@ namespace Vortex.API.Controllers
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
+        private readonly TaskMapper TaskMapper;
 
-        public TaskItemController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService)
+        public TaskItemController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, TaskMapper taskMapper)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
+            TaskMapper = taskMapper;
         }
 
         [HttpPost("new")]
@@ -42,13 +47,12 @@ namespace Vortex.API.Controllers
                     Status = TaskItemStatus.Requested,
                     ProjectId = project.ProjectId,
                     Project = project
-
                 };
 
                 project.Tasks.Add(taskItem);
                 await Context.SaveChangesAsync();
 
-                return Ok(taskItem);
+                return Ok(TaskMapper.Map(taskItem));
             }
 
             return BadRequest(ModelState);
@@ -63,15 +67,13 @@ namespace Vortex.API.Controllers
                     .Include(task => task.Steps)
                     .Where(i => i.ProjectId == projectId);
 
-                if (tasks != null)
-                {
-                    return Ok(tasks);
-                }
-                else
-                {
-                    // User not found
-                    return NotFound();
-                }
+                var viewModel = new List<TaskItemViewModel>();
+
+                foreach (var task in tasks) {
+                    viewModel.Add(TaskMapper.Map(task));
+                }  
+                
+                return Ok(viewModel);
             }
 
             return BadRequest(ModelState);
@@ -86,7 +88,7 @@ namespace Vortex.API.Controllers
 
                 if (taskItem != null)
                 {
-                    return Ok(taskItem);
+                    return Ok(TaskMapper.Map(taskItem));
                 }
                 else
                 {
@@ -117,12 +119,24 @@ namespace Vortex.API.Controllers
                             break;
                         case "status":
                             taskItem.Status = (TaskItemStatus)Convert.ToInt16(model.Value);
+
+                            switch (taskItem.Status)
+                            {
+                                case TaskItemStatus.Requested:
+                                    taskItem.Owner = string.Empty;
+                                    break;
+                                case TaskItemStatus.InProgress:
+                                    var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+                                    taskItem.Owner = user.UserName;
+                                    break;
+                            }
+
                             break;
                     }
 
                     await Context.SaveChangesAsync();
 
-                    return Ok(taskItem);
+                    return Ok(TaskMapper.Map(taskItem));
                 }
                 else
                 {

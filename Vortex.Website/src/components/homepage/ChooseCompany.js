@@ -42,8 +42,8 @@ const ChooseCompany = ({ user, createCompany, setCompany }) => {
                             <div className="row">
                                 <h2 className="pb-3">Collaboration Groups</h2>
                                 {
-                                    user.userCompanies?.$values?.length > 0 ? (
-                                        user.userCompanies?.$values.map((company, i) => (
+                                    user.userCompanies?.length > 0 ? (
+                                        user.userCompanies?.map((company, i) => (
                                             <div className="col-12 mb-1" key={i}>
                                                 <button className="card bg-success text-light border-secondary p-2 w-100"
                                                     onClick={() => selectCompany(company.companyId)}>

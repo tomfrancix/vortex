@@ -24,9 +24,9 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
             displayNewCollaboratorForm(false);
         
             setCompany((prevCompany) => {
-                const updatedCollaborators = [...prevCompany.users.$values, data];
+                const updatedCollaborators = [...prevCompany.users, data];
         
-                const updatedCompany = { ...prevCompany, users: { $values: updatedCollaborators } };
+                const updatedCompany = { ...prevCompany, users: updatedCollaborators };
         
                 return updatedCompany;
             });
@@ -80,11 +80,11 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
         if (response.ok) {
         setCollaborator(null);
         setCompany((prevCompany) => {
-            const updatedCollaborators = prevCompany.users.$values.filter(
+            const updatedCollaborators = prevCompany.users.filter(
             (users) => users.userId !== id
             );
 
-            const updatedCompany = { ...prevCompany, users: { $values: updatedCollaborators } };
+            const updatedCompany = { ...prevCompany, users: updatedCollaborators };
     
             return updatedCompany;
         });
@@ -135,8 +135,8 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
             }
 
             {/*Render the existing user links.*/}
-            {company.users?.$values?.length > 0 ? (
-            company.users?.$values.slice().reverse().map((user, i) => (
+            {company.users?.length > 0 ? (
+            company.users?.slice().reverse().map((user, i) => (
                 
                 <div className="col-12 mb-1" key={i}>
                 {           

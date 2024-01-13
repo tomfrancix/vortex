@@ -6,5 +6,6 @@
         Task<int> DeleteProject(int id);
         Task<int> DeleteTask(int id);
         Task<int> DeleteStep(int id);
+        Task<int> DeleteComment(int id);
     }
 }

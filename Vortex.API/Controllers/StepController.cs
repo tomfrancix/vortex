@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Vortex.API.Data;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
+using Vortex.API.Mappers;
+using Vortex.API.ViewModels;
 
 namespace Vortex.API.Controllers
 {
@@ -14,12 +16,14 @@ namespace Vortex.API.Controllers
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
+        private readonly StepMapper StepMapper;
 
-        public StepController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService)
+        public StepController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, StepMapper stepMapper)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
+            StepMapper = stepMapper;
         }
 
         [HttpPost("new")]
@@ -38,7 +42,7 @@ namespace Vortex.API.Controllers
 
                 await Context.SaveChangesAsync();
 
-                return Ok(step);
+                return Ok(StepMapper.Map(step));
             }
 
             return BadRequest(ModelState);
@@ -51,7 +55,14 @@ namespace Vortex.API.Controllers
             {
                 var steps = Context.Steps.Where(i => i.TaskId == taskId);
 
-                return Ok(steps);
+                var viewModel = new List<StepViewModel>();
+
+                foreach (var step in steps)
+                {
+                    viewModel.Add(StepMapper.Map(step));
+                }
+
+                return Ok(viewModel);
             }
 
             return BadRequest(ModelState);
@@ -70,7 +81,7 @@ namespace Vortex.API.Controllers
 
                     await Context.SaveChangesAsync();
 
-                    return Ok(step);
+                    return Ok(StepMapper.Map(step));
                 }
                 else
                 {

@@ -5,6 +5,12 @@ namespace Vortex.API.ViewModels
 {
     public class CompanyViewModel
     {
+        public CompanyViewModel()
+        {
+            Users = new List<UserViewModel>();
+            Projects = new List<ProjectViewModel>();
+        }
+
         [Required]
         [Display(Name = "Name")]
         public string Name { get; set; }
@@ -12,17 +18,12 @@ namespace Vortex.API.ViewModels
         /// <summary>
         /// Users associated with the company.
         /// </summary>
-        public ICollection<ApplicationUser> Users { get; set; }
+        public ICollection<UserViewModel> Users { get; set; }
 
         /// <summary>
         /// Projects belonging to the company.
         /// </summary>
-        public ICollection<Project> Projects { get; set; }
-
-        /// <summary>
-        /// Users that belong to the company.
-        /// </summary>
-        public ICollection<UserCompany> UserCompanies { get; set; }
+        public ICollection<ProjectViewModel> Projects { get; set; }
 
     }
 }

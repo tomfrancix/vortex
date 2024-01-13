@@ -60,7 +60,7 @@ const Company = ({company, setCompany}) => {
           </div>
         </nav>
 
-        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-dark tertiary-bg " style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-dark bg-black" style={{ flexGrow: 1, overflowY: 'auto' }}>
           {
             project != null ? (
               <Project project={project} setProject={setProject} currentTask={currentTask} setTask={setTask}/>

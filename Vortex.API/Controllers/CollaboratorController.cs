@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Vortex.API.Data;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
+using Vortex.API.Mappers;
 
 namespace Vortex.API.Controllers
 {
@@ -12,10 +13,12 @@ namespace Vortex.API.Controllers
     public class CollaboratorController : ControllerBase
     {
         private readonly ApplicationDbContext Context;
+        private readonly UserMapper UserMapper;
 
-        public CollaboratorController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService)
+        public CollaboratorController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, UserMapper userMapper)
         {
             Context = context;
+            UserMapper = userMapper;
         }
 
         [HttpPost("add")]
@@ -47,14 +50,7 @@ namespace Vortex.API.Controllers
                     try
                     {
                         await Context.SaveChangesAsync();
-                        return Ok(new ApplicationUser()
-                        {
-                            Id = user.Id,
-                            FirstName = user.FirstName,
-                            LastName = user.LastName,
-                            UserName = user.UserName,
-                            Email = user.Email
-                        });
+                        return Ok(UserMapper.Map(user));
                     }
                     catch (Exception ex)
                     {
@@ -82,19 +78,7 @@ namespace Vortex.API.Controllers
 
                 if (collaborator != null)
                 {
-                    // Load additional data related to the user, e.g., UserCompanies
-                    await Context.Entry(company)
-                        .Collection(u => u.Collaborators)
-                        .LoadAsync();
-
-                    company.Collaborators.Remove(collaborator);
-
-                    return Ok();
-                }
-                else
-                {
-                    // User not found
-                    return NotFound();
+                    return Ok(UserMapper.Map(collaborator));
                 }
             }
 

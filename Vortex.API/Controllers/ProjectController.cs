@@ -47,7 +47,7 @@ namespace Vortex.API.Controllers
                 }
 
                 ModelState.AddModelError(string.Empty, "Failed to create the Project.");
-                return BadRequest(ModelState);;
+                return BadRequest(ModelState);
             }
 
             return BadRequest(ModelState);

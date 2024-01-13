@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef  } from 'react';
 import { useFormik } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -6,6 +6,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}) => {
     const token = localStorage.getItem('accessToken');
     const [newProjectFormIsVisible, displayNewProjectForm] = useState(false);
+    const inputRef = useRef(null); 
 
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -15,6 +16,10 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             formik.resetForm();
           }
         };
+
+        if (newProjectFormIsVisible) {
+            inputRef.current.focus();
+          }
     
         // Attach event listener
         document.addEventListener('click', handleOutsideClick);
@@ -55,6 +60,7 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
             });
 
             formik.resetForm();
+            document.getElementById("statusRequested").click();
 
             } else {
             console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
@@ -121,7 +127,8 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
 
     const formik = useFormik({
         initialValues: {
-            name: ''
+            name: '',
+            companyId: company.companyId
         },
         onSubmit: values => {
             values.companyId = company.companyId;
@@ -140,6 +147,7 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
                 <form onSubmit={formik.handleSubmit} className="form-project-container">
                     <div className="input-group mb-2 fs-6">
                     <input
+                    ref={inputRef}
                     type="text"
                     id="name"
                     name="name"
@@ -148,8 +156,8 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
                     className="form-control form-control-sm bg-dark text-light"
                     placeholder={`Name the project...`}
                     />
-                    <button type="submit" className="btn btn-success">Go</button>
                     </div>
+                    <button type="submit" style={{display:"none"}}></button>
                 </form>
             ) : (
                 <>

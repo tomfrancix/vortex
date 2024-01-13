@@ -82,6 +82,10 @@ namespace Vortex.API.Controllers
                         .Collection(u => u.Projects)
                         .LoadAsync();
 
+                    await Context.Entry(company)
+                        .Collection(u => u.Invitations)
+                        .LoadAsync();
+
                     var viewModel = CompanyMapper.Map(company);
 
                     if (company.UserCompanies is { Count: > 0 })

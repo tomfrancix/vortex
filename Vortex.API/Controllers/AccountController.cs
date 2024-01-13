@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web.Resource;
 using Vortex.API.Data;
+using Vortex.API.Mappers;
 using Vortex.API.Models;
 using Vortex.API.Services;
 using Vortex.API.ViewModels;
@@ -21,13 +22,15 @@ namespace Vortex.API.Controllers
         private readonly SignInManager<ApplicationUser> SignInManager;
         private readonly TokenService TokenService;
         private readonly ApplicationDbContext Context;
+        private readonly InvitationMapper InvitationMapper;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService, ApplicationDbContext context)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TokenService tokenService, ApplicationDbContext context, InvitationMapper invitationMapper)
         {
             UserManager = userManager;
             SignInManager = signInManager;
             TokenService = tokenService;
             Context = context;
+            InvitationMapper = invitationMapper;
         }
 
         [AllowAnonymous]
@@ -120,14 +123,14 @@ namespace Vortex.API.Controllers
                 LastName = user.LastName,
                 UserName = user.UserName,
                 Token = TokenService.CreateToken(user),
-                UserCompanies = new List<CompanyDescriptor>()
+                UserCompanies = new List<CompanyDescriptor>(),
+                Invitations = new List<InvitationViewModel>()
             };
 
             var userModel = Context.Users
                 .Include(applicationUser => applicationUser.UserCompanies)
                 .ThenInclude(userCompanies => userCompanies.Company)
                 .FirstOrDefault(u => u.Id == user.Id);
-
 
             foreach (var company in userModel.UserCompanies)
             {
@@ -137,6 +140,19 @@ namespace Vortex.API.Controllers
                     Name = company.Company.Name,
                     UserId = company.UserId
                 });
+            }
+
+            var invitations = Context.Invitations.Where(i => i.Email == user.Email);
+
+            if (invitations.Any())
+            {
+                foreach (var invitation in invitations.Include(invitation => invitation.Company))
+                {
+                    var invite = InvitationMapper.Map(invitation);
+
+                    invite.CompanyName = invitation.Company.Name;
+                    model.Invitations.Add(invite);
+                }
             }
 
             return model;

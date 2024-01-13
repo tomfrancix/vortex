@@ -37,8 +37,7 @@ const Status = ( {currentTask, setTask, setProject} ) => {
           info(prevProject);
           return prevProject;
         });
-        
-        info(`statusRequested${TaskStatusValues[formData.value]}`);
+
         document.getElementById(`status${TaskStatusValues[formData.value]}`.replace(" ", "")).click();
   
       } else {

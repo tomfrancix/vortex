@@ -9,11 +9,14 @@ namespace Vortex.API.ViewModels
         {
             Users = new List<UserViewModel>();
             Projects = new List<ProjectViewModel>();
+            Invitations = new List<InvitationViewModel>();
         }
 
         [Required]
         [Display(Name = "Name")]
         public string Name { get; set; }
+
+        public int CompanyId { get; set; }
 
         /// <summary>
         /// Users associated with the company.
@@ -24,6 +27,11 @@ namespace Vortex.API.ViewModels
         /// Projects belonging to the company.
         /// </summary>
         public ICollection<ProjectViewModel> Projects { get; set; }
+
+        /// <summary>
+        /// Invitations belonging to the company.
+        /// </summary>
+        public ICollection<InvitationViewModel> Invitations { get; set; }
 
     }
 }

@@ -66,6 +66,7 @@ namespace Vortex.API.Extensions
             services.AddSingleton<TaskMapper, TaskMapper>();
             services.AddSingleton<StepMapper, StepMapper>();
             services.AddSingleton<CommentMapper, CommentMapper>();
+            services.AddSingleton<InvitationMapper, InvitationMapper>();
 
             return services;
         }

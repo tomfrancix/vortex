@@ -39,4 +39,9 @@ public class Company
     /// Users that belong to the company.
     /// </summary>
     public ICollection<UserCompany> UserCompanies { get; set; }
+
+    /// <summary>
+    /// Invitations that belong to the company.
+    /// </summary>
+    public ICollection<Invitation> Invitations { get; set; }
 }

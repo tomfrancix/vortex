@@ -21,3 +21,11 @@ ul.steps {
 ul.steps li {
   
 }
+
+
+/* Dark mode */
+@media (prefers-color-scheme: light) {
+  body {
+    background-color:white;
+  }
+}

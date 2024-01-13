@@ -119,8 +119,8 @@ const Comments = ({currentTask, setTask}) => {
                     className="form-control form-control-sm bg-dark text-light border-0"
                     placeholder={`Enter text...`}
                     />
-                    <button type="submit" className="btn btn-success">Go</button>
                   </div>
+                    <button type="submit" style={{display:"none"}}></button>
                 </form>
             ) : (
                 <button type="submit"  

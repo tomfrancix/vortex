@@ -70,7 +70,7 @@
   border:1px solid orange;
 }
 .tab-pane#Completed .card {
-  border:1px solid chartreuse;
+  border:1px solid rgb(88, 112, 64);
 }
 .tab-pane#Archived .card {
   border:1px solid white;
@@ -78,7 +78,7 @@
 }
 
 .bg-dark-medium {
-  background-color:#454545;
+  background-color:#3f3f3f;
 }
 
 .bg-black {
@@ -92,4 +92,62 @@
 .deleteButton:hover {
   color:red;
   cursor:pointer;
+}
+
+.bg-purple {
+  background-color:#41004d !important;
+}
+
+.bg-blue {
+  background-color:#00695f !important;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: light) {
+   .bg-white, .navbar-dark, .navbar-brand {
+     background-color:white !important;
+     color:black !important;
+   }
+
+   .bg-dark {
+    background-color:white !important;
+   }
+
+   .text-light{
+    color:black !important;
+   }
+
+   .bg-dark-medium, .bg-secondary, .nav-link.active, .badge.badge-secondary {
+     background-color:#f5f5f5 !important;
+     color:black;
+   }
+   
+   .bg-black {
+     background-color:#ffffff !important;
+   }
+
+   .bg-purple {
+     background-color:#f9d9ff !important;
+   }
+   
+   .bg-blue {
+     background-color:#defffc !important;
+   }
+
+   .border-secondary {
+       border-color:rgba(0,0,0,0.1) !important;
+   }
+
+  .tab-pane#Requested .card {
+    border:1px solid rgb(255, 108, 181, 0.5);
+  }
+  .tab-pane#InProgress .card {
+    border:1px solid rgb(0, 191, 255, 0.5);
+  }
+  .tab-pane#ForReview .card {
+    border:1px solid rgb(255, 166, 0, 0.5);
+  }
+  .tab-pane#Completed .card {
+    border:1px solid rgb(88, 112, 64, 0.5);
+  }
 }

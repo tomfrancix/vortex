@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vortex.API.Models;
 
@@ -11,9 +12,10 @@ using Vortex.API.Models;
 namespace Vortex.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240113151136_CreateInvitationTable")]
+    partial class CreateInvitationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -308,8 +310,6 @@ namespace Vortex.API.Migrations
 
                     b.HasKey("InvitationId");
 
-                    b.HasIndex("CompanyId");
-
                     b.ToTable("Invitations");
                 });
 
@@ -510,17 +510,6 @@ namespace Vortex.API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Vortex.API.Models.Invitation", b =>
-                {
-                    b.HasOne("Vortex.API.Models.Company", "Company")
-                        .WithMany("Invitations")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-                });
-
             modelBuilder.Entity("Vortex.API.Models.Project", b =>
                 {
                     b.HasOne("Vortex.API.Models.ApplicationUser", null)
@@ -597,8 +586,6 @@ namespace Vortex.API.Migrations
             modelBuilder.Entity("Vortex.API.Models.Company", b =>
                 {
                     b.Navigation("Collaborators");
-
-                    b.Navigation("Invitations");
 
                     b.Navigation("Projects");
 

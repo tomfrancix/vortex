@@ -52,5 +52,10 @@ namespace Vortex.API.Data
         /// Comments by the user.
         /// </summary>
         public ICollection<Comment> Comments { get; set; }
+
+        /// <summary>
+        /// Invitations to companies.
+        /// </summary>
+        public ICollection<InvitationViewModel> Invitations { get; set; }
     }
 }

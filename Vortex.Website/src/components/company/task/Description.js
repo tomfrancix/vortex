@@ -118,7 +118,7 @@ const Description = ( {currentTask, setTask, setProject} ) => {
         {
           editDescriptionFormIsVisible ? (
             <form onSubmit={formikDescription.handleSubmit} className="form-description-container">
-                <div className="input-group mb-2 fs-6  text-light mt-2">
+                <div className="input-group mb-0 fs-6 text-light mt-2">
 
                   <input type="hidden" name="field" id="field" value="description" />
                   <textarea
@@ -128,13 +128,13 @@ const Description = ( {currentTask, setTask, setProject} ) => {
                   name="value"
                   onChange={formikDescription.handleChange}
                   value={formikDescription.values.value}
-                  className="form-control form-control-sm bg-dark text-light border-0 mb-5"
+                  className="form-control form-control-sm bg-dark text-light border-0 mb-1"
                   style={{height: `${(currentTask.description.match(/\n/g) || []).length * 1.5 + 3}em`}}
                   ></textarea>
-                  <button type="submit" className="btn btn-success" style={{ maxHeight:"40px", bottom:"0px", right:0, marginTop:"40px", position:"absolute"}}>
+                </div>
+                  <button type="submit" className="btn btn-sm btn-success m-0 mt-1" style={{height:"25px", padding:"0 5px", float:"right" }}>
                     <FontAwesomeIcon icon={faCheck} />
                   </button>
-                </div>
             </form>
           ) : (
             <>
@@ -144,7 +144,7 @@ const Description = ( {currentTask, setTask, setProject} ) => {
               className="btn btn-sm btn-default text-light w-100"
               style={{ padding:"14px 6px", textAlign:"left", whiteSpace: "pre-line", height: `${(currentTask.description.match(/\n/g) || []).length * 1.5 + 5}em` }}
             >
-             <p style={{textDecoration:"underline", textDecorationStyle:"dotted"}}>{currentTask.description == "" ? "Add a description..." : currentTask.description}</p>
+             <p>{currentTask.description == "" ? "" : currentTask.description}</p>
             </div>
             </>
           )

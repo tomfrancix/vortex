@@ -14,11 +14,13 @@ namespace Vortex.API.Controllers
     {
         private readonly ApplicationDbContext Context;
         private readonly UserMapper UserMapper;
+        private readonly InvitationMapper InvitationMapper;
 
-        public CollaboratorController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, UserMapper userMapper)
+        public CollaboratorController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, UserMapper userMapper, InvitationMapper invitationMapper)
         {
             Context = context;
             UserMapper = userMapper;
+            InvitationMapper = invitationMapper;
         }
 
         [HttpPost("add")]
@@ -26,42 +28,29 @@ namespace Vortex.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var company = Context.Companies.Include(c => c.Collaborators).FirstOrDefault(c => c.CompanyId == model.CompanyId);
+                var existingInvitation = Context.Invitations.FirstOrDefault(c => c.CompanyId == model.CompanyId && c.Email == model.Email);
 
-                var user = Context.Users.FirstOrDefault(u => u.Email == model.Email);
-
-                if (company != null && user != null)
+                if (existingInvitation is null)
                 {
-                    // Check if the collaborator is already in the context, and if so, update it.
-                    var existingCollaborator = Context.Users.Local.FirstOrDefault(u => u.Id == user.Id);
+                    var invitation = new Invitation
+                    {
+                        Email = model.Email,
+                        CompanyId = model.CompanyId,
+                        AcceptedInvitation = false
+                    };
 
-                    if (existingCollaborator != null)
+                    Context.Invitations.Add(invitation);
+
+                    var result = await Context.SaveChangesAsync();
+
+                    if (result > 0)
                     {
-                        Context.Entry(existingCollaborator).CurrentValues.SetValues(user);
-                    }
-                    else
-                    {
-                        // If not, attach the collaborator to the context.
-                        Context.Users.Attach(user);
+                        return Ok(InvitationMapper.Map(invitation));
                     }
 
-                    company.Collaborators.Add(user);
-
-                    try
-                    {
-                        await Context.SaveChangesAsync();
-                        return Ok(UserMapper.Map(user));
-                    }
-                    catch (Exception ex)
-                    {
-                        // Handle the exception appropriately, log it, and return a BadRequest response.
-                        ModelState.AddModelError(string.Empty, $"Failed to create the Collaborator. {ex.Message}");
-                        return BadRequest(ModelState);
-                    }
+                    ModelState.AddModelError(string.Empty, "Failed to create the invitation.");
+                    return BadRequest(ModelState);
                 }
-
-                ModelState.AddModelError(string.Empty, "Company or user not found.");
-                return BadRequest(ModelState);
             }
 
             return BadRequest(ModelState);

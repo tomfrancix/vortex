@@ -2,12 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import UseEnhancedLogger from '../../debug/EnhancedLogger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const Comments = ({currentTask, setTask}) => {
     const { debug, info, warn, error } = UseEnhancedLogger('Comments');
     const [addCommentFormIsVisible, displayAddCommentForm] = useState(false);
     const commentsInputRef = useRef(null);
+
+    const splitString = (input, maxLength) => {
+      const lines = input.split('\n');
+      const result = lines.reduce((acc, line) => {
+        const chunks = [];
+        for (let i = 0; i < line.length; i += maxLength) {
+          chunks.push(line.substring(i, i + maxLength));
+        }
+        return acc.concat(chunks);
+      }, []);
+    
+      return result;
+    };
+
+    const getHeight = (element) => {
+      if (element != null) {
+        const width = element.current.clientWidth;
+        const characterWidth = 10;
+        const lines = splitString(element.current.value, width/characterWidth).length + 1;
+        const lineHeight = 1.5; 
+        return `${lines * lineHeight + 5}em`;
+      }
+    }
 
     useEffect(() => {
       const handleOutsideClick = (event) => {
@@ -17,14 +40,26 @@ const Comments = ({currentTask, setTask}) => {
           formikComments.resetForm();
         }
       };
+
+      const updateTextAreaHeight = () => {
+        if (addCommentFormIsVisible && commentsInputRef.current) {
+          const newHeight = getHeight(commentsInputRef);
+
+          commentsInputRef.current.style.height = newHeight;
+        }
+      };
+  
+      commentsInputRef.current?.addEventListener('input', updateTextAreaHeight);
   
       // Attach event listener
       document.addEventListener('click', handleOutsideClick);
   
       // Detach event listener on component unmount
       return () => {
+        commentsInputRef.current?.removeEventListener('input', updateTextAreaHeight);
         document.removeEventListener('click', handleOutsideClick);
       };
+
     }, [addCommentFormIsVisible]);
 
     const addComment = async (formData) => {
@@ -83,16 +118,32 @@ const Comments = ({currentTask, setTask}) => {
         },
     });
 
+    function submitOnEnter(event) {
+      if (event.which === 13 && !event.shiftKey) {
+        console.log(event)
+          if (!event.repeat) {
+              const newEvent = new Event("submit", {cancelable: true});
+              event.target.form.requestSubmit();
+          }
+  
+          event.preventDefault();
+      }
+    }
+
     useEffect(() => {
       if (addCommentFormIsVisible) {
         formikComments.setFieldValue("taskItemId", currentTask.taskItemId);
+        
+        document.getElementById("addComment").removeEventListener("keydown", submitOnEnter);
+        document.getElementById("addComment").addEventListener("keydown", submitOnEnter);
         commentsInputRef.current.focus();
       }
     }, [addCommentFormIsVisible, currentTask.comments]);
     
     const displayCommentForm = (shouldDisplay, currentValue, ref) => {
         info("currentTask");
-        info(currentTask);
+        info(currentTask);     
+
         if (ref.current) {
             ref.current.focus();
         }
@@ -103,16 +154,43 @@ const Comments = ({currentTask, setTask}) => {
         <li className="list-group-item bg-dark text-light border border-secondary">
             <small>Comments:</small><br/>
             <ul className="comments p-0 m-0">
-            {
+                        {currentTask.comments?.map((comment, index) => (
+                <React.Fragment key={comment.commentId}>
+                {
+                <>
+                  <li className="d-flex">
+                      <div className="bg-dark-medium py-1 px-2 border-1 mt-2 flex-grow-1" style={{fontSize:"10pt", padding:"14px 6px", textAlign:"left", whiteSpace: "pre-line", 
+                      height: getHeight(this)}}>
+                        <strong className="text-muted">
+                          <small>
+                    <FontAwesomeIcon icon={faUser} />
+                            <span className="px-2">
+                            {comment.user.firstName} {comment.user.lastName}
+                            </span>
+                            <hr className="m-1"/>
+                          </small>
+                          </strong>
+                        <p className="m-0 p-1 text-break">
+                          <strong>{comment.content}</strong>
+                        </p>
+                      </div>
+                  </li>
+                </>
+                }
+                </React.Fragment>
+            ))}
+        </ul>
+
+        {
             addCommentFormIsVisible ? (
                 <form onSubmit={formikComments.handleSubmit} className="form-comments-container">
                   <i className="glyphicon glyphicon-unchecked" ></i>
                   <div className="input-group mb-2 fs-6  text-light mt-2">
                     <input type="hidden" name="taskItemId" value={currentTask.taskItemId} />
-                    <input
+                    <textarea
                     ref={commentsInputRef} 
                     type="text"
-                    id="text"
+                    id="addComment"
                     name="text"
                     onChange={formikComments.handleChange}
                     value={formikComments.values.text}
@@ -134,22 +212,6 @@ const Comments = ({currentTask, setTask}) => {
                 </button>
             )
             }
-
-            {currentTask.comments?.slice().reverse().map((comment, index) => (
-                <React.Fragment key={comment.commentId}>
-                {
-                <>
-                  <li className="d-flex">
-                      <div className="bg-dark-medium py-1 px-2 border-1 mt-2 flex-grow-1" style={{fontSize:"10pt"}}>
-                        <strong>{comment.user.firstName} {comment.user.lastName}</strong>
-                        <p style={{marginBottom:"8px"}}>{comment.content}</p>
-                      </div>
-                  </li>
-                </>
-                }
-                </React.Fragment>
-            ))}
-        </ul>
       </li>
     )
 }

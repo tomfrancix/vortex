@@ -65,6 +65,8 @@ namespace Vortex.API.Controllers
             {
                 var tasks = Context.Tasks
                     .Include(task => task.Steps)
+                    .Include(task => task.Comments)
+                    .ThenInclude(c => c.User)
                     .Where(i => i.ProjectId == projectId);
 
                 var viewModel = new List<TaskItemViewModel>();
@@ -88,6 +90,14 @@ namespace Vortex.API.Controllers
 
                 if (taskItem != null)
                 {
+                    await Context.Entry(taskItem)
+                        .Collection(u => u.Steps)
+                        .LoadAsync();
+
+                    await Context.Entry(taskItem)
+                        .Collection(u => u.Comments)
+                        .LoadAsync();
+
                     return Ok(TaskMapper.Map(taskItem));
                 }
                 else

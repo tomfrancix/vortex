@@ -11,7 +11,7 @@ const Header = ({ websiteData, handleLogout, authenticated, company }) => {
             <div className="row">
                 <div className="col-sm-8 col-md-7 py-4">
                     <h4>A Website for Task Management</h4>
-                    <p className="text-muted">{websiteData.about}</p>
+                    <p className="text-dark">{websiteData.about}</p>
                 </div>
                 <div className="col-sm-4 offset-md-1 py-4">
                     <h4>By Thomas Fahey</h4>
@@ -32,7 +32,7 @@ const Header = ({ websiteData, handleLogout, authenticated, company }) => {
             {
                 company != null ? (
                     <div className="ms-auto px-3">
-                        <span className="text-dark-50">Current Company:</span> <strong>{company.name}</strong> 
+                        <span className="text-dark-50 hide-sm">Current Company:</span> <strong>{company.name}</strong> 
                     </div>
                 ) : ( <></>)
             }

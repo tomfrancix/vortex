@@ -89,6 +89,7 @@ const Description = ( {currentTask, setTask, setProject} ) => {
       formikDescription.setFieldValue("value", currentTask.description);
       descriptionInputRef.current.focus();
     }
+    
     const updateTextAreaHeight = () => {
       if (editDescriptionFormIsVisible && descriptionInputRef.current) {
         const lines = descriptionInputRef.current.value.split('\n').length;

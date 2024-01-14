@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-const ChooseCompany = ({ user, createCompany, setCompany }) => {
+const ChooseCompany = ({ user, setUser, createCompany, setCompany }) => {
     
     const token = localStorage.getItem('accessToken');
 
@@ -32,26 +32,28 @@ const ChooseCompany = ({ user, createCompany, setCompany }) => {
         }
     };
 
-    const respondToInvitation = async (id) => {
-        var url = '/api/Company/read';
+    const respondToInvitation = async (companyId, response) => {
+        var url = '/api/Collaborator/respond';
 
         try {
-            const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(id)
+            const result = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    companyId: companyId,
+                    response: response
+                })
             });
     
-            if (response.ok) {
-                const data = await response.json();
+            if (result.ok) {
+                const data = await result.json();
                 console.log(data);
-                setCompany(data)
+                setUser(data);
             } else {
-                console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+                console.error(`Failed to ${url.split('/').pop()}:`, result.statusText);
             }
         } catch (error) {
             console.error(`Error ${url.split('/').pop()}:`, error);

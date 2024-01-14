@@ -20,8 +20,10 @@ namespace Vortex.API.Mappers
             var model = new CommentViewModel
             {
                 CommentId = entity.CommentId,
-                User = UserMapper.Map(entity.User),
-                Content = entity.Content
+                Content = entity.Content,
+                UserId = entity.UserId,
+                User = UserMapper.Map(entity.User)
+                
             };
 
             return model;

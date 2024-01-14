@@ -6,11 +6,12 @@ import Steps from './task/Steps';
 import Comments from './task/Comments';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import ScrollableElement from './ScrollableElement';
 
 const Task = ( {currentTask, setTask, setProject} ) => {
   
   return (
-    <ul className="list-group ">
+      <ul className="list-group" style={{marginBottom:"400px"}}>
       <li className="list-group-item bg-dark text-light border border-secondary">
         <small>
         ID: #{currentTask.taskItemId}
@@ -21,11 +22,13 @@ const Task = ( {currentTask, setTask, setProject} ) => {
           <FontAwesomeIcon icon={faTrash} />
         </button>
       </li>
+    <ScrollableElement >
       <Summary currentTask={currentTask} setTask={setTask} setProject={setProject}/>
       <Status currentTask={currentTask} setTask={setTask} setProject={setProject}/>
       <Description currentTask={currentTask} setTask={setTask} setProject={setProject} />
       <Steps currentTask={currentTask} setTask={setTask} setProject={setProject}  />
       <Comments currentTask={currentTask} setTask={setTask} />
+    </ScrollableElement>
     </ul>
   );
 };

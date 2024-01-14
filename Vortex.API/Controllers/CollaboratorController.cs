@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +16,11 @@ namespace Vortex.API.Controllers
         private readonly ApplicationDbContext Context;
         private readonly UserMapper UserMapper;
         private readonly InvitationMapper InvitationMapper;
+        private readonly UserManager<ApplicationUser> UserManager;
 
         public CollaboratorController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, UserMapper userMapper, InvitationMapper invitationMapper)
         {
+            UserManager = userManager;
             Context = context;
             UserMapper = userMapper;
             InvitationMapper = invitationMapper;
@@ -50,6 +53,51 @@ namespace Vortex.API.Controllers
 
                     ModelState.AddModelError(string.Empty, "Failed to create the invitation.");
                     return BadRequest(ModelState);
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("respond")]
+        public async Task<IActionResult> Respond([FromBody] RespondToInvitationDescriptor model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+
+                if (user != null)
+                {
+                    var existingInvitation = Context.Invitations.FirstOrDefault(c => c.CompanyId == model.CompanyId && c.Email == user.Email);
+
+                    if (existingInvitation is not null)
+                    {
+                        existingInvitation.AcceptedInvitation = model.Response;
+
+                        if (existingInvitation.AcceptedInvitation)
+                        {
+                            var userCompanies = Context.Users.Find(user.Id).UserCompanies;
+
+                            userCompanies.Add(new UserCompany
+                            {
+                                UserId = user.Id,
+                                CompanyId = model.CompanyId
+                            });
+                        }
+
+                        // Easier to just remove it for now.
+                        Context.Invitations.Remove(existingInvitation);
+
+                        var result = await Context.SaveChangesAsync();
+
+                        if (result > 0)
+                        {
+                            return Ok(UserMapper.Map(user));
+                        }
+
+                        ModelState.AddModelError(string.Empty, "Failed to respond to the invitation.");
+                        return BadRequest(ModelState);
+                    }
                 }
             }
 

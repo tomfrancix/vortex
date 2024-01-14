@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faUser, faPlus } from '@fortawesome/free-solid-svg-icons';
 
-const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollaborator}) => {
+const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollaborator, currentUser}) => {
     const token = localStorage.getItem('accessToken');
     const [newCollaboratorFormIsVisible, displayNewCollaboratorForm] = useState(false);
     const inputRef = useRef(null); 
     
+    useEffect(() => {
+        console.log("UserManagerLinks: Using effect", currentCollaborator);
+    }, [currentCollaborator]);
+
     useEffect(() => {
         const handleOutsideClick = (event) => {
           // Check if the click is outside the form and if the form is visible
@@ -66,26 +70,9 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
         }
     };
 
-    const selectCollaborator = async (formData) => {
-        setCollaborator(null);
-        var url = '/api/Collaborator/read'
-        const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(formData)
-            });
-
-        if (response.ok) {
-            const collaborator = await response.json();
-            setCollaborator(collaborator);
-            displayNewCollaboratorForm(false)
-        } else {
-            console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
-        }
+    const selectCollaborator = async (collaborator) => {
+        console.log("UserManagerLinks: Set Collaborator", collaborator)
+        setCollaborator({...collaborator});
     };
 
     const removeCollaborator = async (id) => {
@@ -128,6 +115,31 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
         }
     });
 
+    const UserLink = ({currentUser, user, company, selectCollaborator}) => {
+        return (
+            <div className="input-group w-100">
+                <button className="card flex-fill text-light border-secondary p-1 mt-1 bg-blue d-flex flex-row"
+                    onClick={() => selectCollaborator(user)}>
+                    <div><FontAwesomeIcon icon={faUser} /></div>
+                    {           
+                    
+                        currentUser.userName == user.userName ? (
+                            <div className="mx-1">
+                                YOU: {user.firstName} {user.lastName}
+                            </div>
+                        ) 
+                        : 
+                        (
+                            <div className="mx-1">
+                                <strong></strong>{user.firstName} {user.lastName}
+                            </div>
+                        )
+                    }
+                </button>
+            </div>
+        )
+      }
+
     return (
         <div className="py-4">
             <h2 className="fs-6">Collaborators</h2>
@@ -154,8 +166,12 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
                 </form>
             ) : (
                 <>
-                <button type="submit"  onClick={() => displayNewCollaboratorForm(true)} className="card bg-dark text-light border-secondary p-2 w-100 mb-2" >
-                Add Collaborator
+                <button type="submit"  onClick={() => displayNewCollaboratorForm(true)} className="card bg-dark text-light border-secondary p-2 w-100 mb-2" 
+                    style={{border:"1px dashed grey", flexDirection:"row"}} >
+                    <div>
+                        <FontAwesomeIcon icon={faPlus} />
+                    </div>
+                    <span className="px-2">Invite by Email</span>
                 </button>
                 </>
             )
@@ -183,36 +199,32 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
 <br />
             {/*Render the existing user links.*/}
             {company.users?.length > 0 ? (
-                company.users?.slice().reverse().map((user, i) => (
+                company.users?.map((user, i) => (
                     
                     <div className="col-12 mb-1" key={i}>
                         {           
                             i == 0 ? (
+                                <>
+                                <small className="">Administrator</small>
+                                <UserLink currentUser={currentUser} user={user} company={company} selectCollaborator={selectCollaborator}/>
+                                <br/>
+                                </>
+                            ) : (<></>)
+                        }
+
+                        {           
+                            i == 1 ? (
                                 <small className="">Existing Members</small>
                             ) : (<></>)
                         }
-                        <div className="input-group w-100">
-                            <button className="card flex-fill text-light border-secondary p-1 mt-1 bg-blue d-flex flex-row"
-                                onClick={() => selectCollaborator(user.userId, company.companyId)}>
-                                <div><FontAwesomeIcon icon={faUser} /></div>
-                                {           
-                                
-                                    currentCollaborator != null && currentCollaborator.userId == user.userId ? (
-                                    
-                                                <div className="mx-1">
-                                                    {user.firstName} {user.lastName}
-                                                </div>
-                                    ) 
-                                    : 
-                                    (
-                                        
-                                                <div className="mx-1">
-                                                    <strong>YOU: </strong>{user.firstName} {user.lastName}
-                                                </div>
-                                    )
-                                }
-                            </button>
-                        </div>
+                        
+                        {           
+                            i >= 1 ? (
+                                <UserLink currentUser={currentUser} user={user} company={company} selectCollaborator={selectCollaborator}/>
+                            ) : (<></>)
+                        }
+
+                        
                     </div>
                 ))) : (<></>)
             }

@@ -59,7 +59,7 @@ const App = () => {
         user?.isLoggedIn ? (
           // Authenticated Page
           <div>
-            <HomePage handleLogout={handleLogout} user={user} websiteData={websiteData} />
+            <HomePage handleLogout={handleLogout} user={user} setUser={setUser} websiteData={websiteData} />
           </div>
         ) : (
           // Non-Authenticated Page

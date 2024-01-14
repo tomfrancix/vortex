@@ -5,6 +5,10 @@ import TaskStatusEnum, { TaskStatusValues } from '../../enum/TaskStatusEnum';
 const Status = ( {currentTask, setTask, setProject} ) => {
   const { debug, info, warn, error } = UseEnhancedLogger('Task');
 
+  useEffect(() => {
+    currentTask.status = currentTask.status;
+  }, [currentTask.status])
+
   const editTask = async (formData) => {
     var url = '/api/taskitem/edit';
     if (formData.field == null) {
@@ -25,13 +29,16 @@ const Status = ( {currentTask, setTask, setProject} ) => {
 
       if (response.ok) {
         const data = await response.json();
-        setTask(data);
+        info(`Setting current task status (${currentTask.status}) to ${data.status}`);
+        // currentTask.status = data.status; This doesn't work. React needs a new object entirely, see below.
+        const updatedTask = {...currentTask, status: data.status, owner: data.owner}
+        setTask(updatedTask);
 
         setProject((prevProject) => {
 
           var index = prevProject.tasks.findIndex((task) => task.taskItemId === data.taskItemId)
 
-          prevProject.tasks[index] = data;
+          prevProject.tasks[index] = currentTask;
 
           info("Setting project...");
           info(prevProject);

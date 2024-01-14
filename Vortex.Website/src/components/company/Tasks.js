@@ -152,7 +152,7 @@ const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator 
                   onChange={formik.handleChange}
                   value={formik.values.name}
                   className="form-control form-control-sm bg-dark text-light"
-                  placeholder={`Name the task...`}
+                  placeholder={`Summarise the task...`}
                 />
                 <button type="submit" className="btn btn-success">Go</button>
               </div>

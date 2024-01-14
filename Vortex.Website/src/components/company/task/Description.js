@@ -84,9 +84,23 @@ const Description = ( {currentTask, setTask, setProject} ) => {
     },
   });
   
+  function submitOnEnter(event) {
+    if (event.which === 13 && !event.shiftKey) {
+      console.log(event)
+        if (!event.repeat) {
+            const newEvent = new Event("submit", {cancelable: true});
+            event.target.form.requestSubmit();
+        }
+
+        event.preventDefault();
+    }
+  }
+  
   useEffect(() => {
     if (editDescriptionFormIsVisible) {
       formikDescription.setFieldValue("value", currentTask.description);
+      document.getElementById("descriptionValue").removeEventListener("keydown", submitOnEnter);
+      document.getElementById("descriptionValue").addEventListener("keydown", submitOnEnter);
       descriptionInputRef.current.focus();
     }
     
@@ -118,14 +132,14 @@ const Description = ( {currentTask, setTask, setProject} ) => {
         <small>Description:</small><br/>
         {
           editDescriptionFormIsVisible ? (
-            <form onSubmit={formikDescription.handleSubmit} className="form-description-container">
+            <form onSubmit={formikDescription.handleSubmit} className="form-description-container mb-4">
                 <div className="input-group mb-0 fs-6 text-light mt-2">
 
                   <input type="hidden" name="field" id="field" value="description" />
                   <textarea
                   ref={descriptionInputRef} 
                   type="text"
-                  id="value"
+                  id="descriptionValue"
                   name="value"
                   onChange={formikDescription.handleChange}
                   value={formikDescription.values.value}
@@ -133,20 +147,36 @@ const Description = ( {currentTask, setTask, setProject} ) => {
                   style={{height: `${(currentTask.description.match(/\n/g) || []).length * 1.5 + 3}em`}}
                   ></textarea>
                 </div>
-                  <button type="submit" className="btn btn-sm btn-success m-0 mt-1" style={{height:"25px", padding:"0 5px", float:"right" }}>
+                  <button type="submit" className="btn btn-sm btn-success m-0 mt-0" style={{height:"25px", padding:"0 5px", float:"right" }}>
                     <FontAwesomeIcon icon={faCheck} />
                   </button>
             </form>
           ) : (
             <>
-            <div
-              type="submit"
-              onClick={() => displayDescriptionForm(true, currentTask.description, descriptionInputRef)}
-              className="btn btn-sm btn-default text-light w-100"
-              style={{ padding:"14px 6px", textAlign:"left", whiteSpace: "pre-line", height: `${(currentTask.description.match(/\n/g) || []).length * 1.5 + 5}em` }}
-            >
-             <p>{currentTask.description == "" ? "" : currentTask.description}</p>
-            </div>
+            {
+              currentTask.description.length < 1 ? (
+                <div
+                  type="submit"
+                  onClick={() => displayDescriptionForm(true, currentTask.description, descriptionInputRef)}
+                  className="btn btn-sm btn-default text-light w-100 p-2 mt-1"
+                  style={{ border:"1px dashed grey", textAlign:"left", whiteSpace: "pre-line"}}
+                >
+                  <span style={{textDecoration:"underline", textDecorationStyle:"dotted"}}>
+                    <FontAwesomeIcon icon={faPlus} />
+                    <span className="px-2">Add a description</span>
+                  </span>
+                </div>
+              ) : (
+                <div
+                  type="submit"
+                  onClick={() => displayDescriptionForm(true, currentTask.description, descriptionInputRef)}
+                  className="btn btn-sm btn-default text-light w-100"
+                  style={{ padding:"14px 6px", textAlign:"left", whiteSpace: "pre-line", height: `${(currentTask.description.match(/\n/g) || []).length * 1.5 + 5}em` }}
+                >
+                <p>{currentTask.description == "" ? "" : currentTask.description}</p>
+                </div>
+              )
+            }
             </>
           )
         }

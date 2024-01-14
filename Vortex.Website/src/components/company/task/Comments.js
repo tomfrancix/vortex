@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import UseEnhancedLogger from '../../debug/EnhancedLogger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUser, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const Comments = ({currentTask, setTask}) => {
     const { debug, info, warn, error } = UseEnhancedLogger('Comments');
     const [addCommentFormIsVisible, displayAddCommentForm] = useState(false);
     const commentsInputRef = useRef(null);
+    const token = localStorage.getItem('accessToken');
 
     const splitString = (input, maxLength) => {
       const lines = input.split('\n');
@@ -149,6 +150,35 @@ const Comments = ({currentTask, setTask}) => {
         }
         displayAddCommentForm(shouldDisplay);
     };
+
+    const deleteComment = async (id) => {
+
+      var url = '/api/Comment/delete'
+  
+      const response = await fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(id)
+      });
+  
+      if (response.ok) {
+      setTask((prevTask) => {
+          const updatedComments = prevTask.comments.filter(
+          (comment) => comment.commentId !== id
+          );
+  
+          const updatedTask = { ...prevTask, comments: updatedComments };
+  
+          return updatedTask;
+        });
+      } else {
+        console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+      }
+    };
     
     return (
         <li className="list-group-item bg-dark text-light border border-secondary">
@@ -167,9 +197,12 @@ const Comments = ({currentTask, setTask}) => {
                             <span className="px-2">
                             {comment.user.firstName} {comment.user.lastName}
                             </span>
-                            <hr className="m-1"/>
                           </small>
                           </strong>
+                          <button className="btn btn-sm btn-default deleteButton px-0 pt-0" onClick={() => deleteComment(comment.commentId)} style={{border:"none", float:"right"}}>
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                            <hr className="m-1"/>
                         <p className="m-0 p-1 text-break">
                           <strong>{comment.content}</strong>
                         </p>
@@ -182,36 +215,35 @@ const Comments = ({currentTask, setTask}) => {
         </ul>
 
         {
-            addCommentFormIsVisible ? (
-                <form onSubmit={formikComments.handleSubmit} className="form-comments-container">
-                  <i className="glyphicon glyphicon-unchecked" ></i>
-                  <div className="input-group mb-2 fs-6  text-light mt-2">
-                    <input type="hidden" name="taskItemId" value={currentTask.taskItemId} />
-                    <textarea
-                    ref={commentsInputRef} 
-                    type="text"
-                    id="addComment"
-                    name="text"
-                    onChange={formikComments.handleChange}
-                    value={formikComments.values.text}
-                    className="form-control form-control-sm bg-dark text-light border-0"
-                    placeholder={`Enter text...`}
-                    />
-                  </div>
-                    <button type="submit" style={{display:"none"}}></button>
-                </form>
-            ) : (
-                <button type="submit"  
-                onClick={() => displayCommentForm(true, currentTask.comments, commentsInputRef)} 
-                className="card bg-dark text-light border-secondary p-2 mt-2 w-100 mb-2"
-                style={{border:"1px dashed grey", flexDirection:"row"}} >
-                <div>
-                    <FontAwesomeIcon icon={faPlus} />
-                </div>
-                <span className="px-2">Add Comment</span>
-                </button>
-            )
-            }
+          addCommentFormIsVisible ? (
+            <form onSubmit={formikComments.handleSubmit} className="form-comments-container">
+              <i className="glyphicon glyphicon-unchecked" ></i>
+              <div className="input-group mb-2 fs-6  text-light mt-2">
+                <input type="hidden" name="taskItemId" value={currentTask.taskItemId} />
+                <textarea
+                ref={commentsInputRef} 
+                type="text"
+                id="addComment"
+                name="text"
+                onChange={formikComments.handleChange}
+                value={formikComments.values.text}
+                className="form-control form-control-sm bg-dark text-light border-0"
+                >Enter text...</textarea>
+              </div>
+                <button type="submit" style={{display:"none"}}></button>
+            </form>
+          ) : (
+            <button type="submit"  
+              onClick={() => displayCommentForm(true, currentTask.comments, commentsInputRef)} 
+              className="card bg-dark text-light border-secondary p-2 mt-2 w-100 mb-2"
+              style={{border:"1px dashed grey", flexDirection:"row"}} >
+              <div>
+                  <FontAwesomeIcon icon={faPlus} />
+              </div>
+              <span className="px-2">Add Comment</span>
+            </button>
+          )
+        }
       </li>
     )
 }

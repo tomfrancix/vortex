@@ -16,7 +16,13 @@ const Project = ({project, setProject, currentTask, setTask, currentCollaborator
       <div className="container-fluid" style={{overflow:"hidden"}}>
         <div className="row">
           <div className="p-2 px-3 my-2 rounded text-light">
-            <h3>{project.name}</h3>
+            <div className="w-100 d-flex flex-row">
+              <h3 className="pt-1 pb-0 mb-0 flex-grow-1">{project.name}</h3>
+              <div className="input-group w-auto">
+                <button className="btn btn-sm btn-secondary" onClick={() => setProject(null)}>Project Settings</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => setProject(null)}>Close</button>
+              </div>
+            </div>
             <hr/>
             <div className="container-fluid" style={{fontSize:"9pt"}}>
               <div className="row">
@@ -40,7 +46,8 @@ const Project = ({project, setProject, currentTask, setTask, currentCollaborator
                         <React.Fragment key={status}>
                           <li className="nav-item flex-grow-1 text-center">
                             <a className="nav-link text-light p-1 mb-1" data-bs-toggle="pill" id={`status${TaskStatusValues[index].replace(" ", "")}`} href={`#${TaskStatusValues[index].replace(" ", "")}`}>{TaskStatusValues[index]}</a>
-                            <div className={`badge fs-7 pill-${TaskStatusValues[index].replace(" ", "")} text-dark`}>{project?.tasks?.filter(task => task.status === index).length}</div>
+                            <div className={`badge fs-6 pill-${TaskStatusValues[index].replace(" ", "")} text-dark`} style={{paddingTop:"2px"}}>{project?.tasks?.filter(task => task.status === index && (currentCollaborator != null ? (task.creator === currentCollaborator.userName || task.owner === currentCollaborator.userName) : task))
+                    .length}</div>
                           </li>                     
                         </React.Fragment>
                       ))}

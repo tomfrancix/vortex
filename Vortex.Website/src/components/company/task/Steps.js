@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import UseEnhancedLogger from '../../debug/EnhancedLogger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import './Steps.css';
 import Status from './steps/Status';
 
@@ -10,6 +10,7 @@ const Steps = ({currentTask, setTask, setProject}) => {
     const { debug, info, warn, error } = UseEnhancedLogger('Steps');
     const [addStepFormIsVisible, displayAddStepForm] = useState(false);
     const stepsInputRef = useRef(null);
+    const token = localStorage.getItem('accessToken');
     
     useEffect(() => {
       const handleOutsideClick = (event) => {
@@ -100,6 +101,35 @@ const Steps = ({currentTask, setTask, setProject}) => {
         }
         displayAddStepForm(shouldDisplay);
     };
+
+    const deleteStep = async (id) => {
+
+      var url = '/api/Step/delete'
+  
+      const response = await fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(id)
+      });
+  
+      if (response.ok) {
+      setTask((prevTask) => {
+          const updatedSteps = prevTask.steps.filter(
+          (step) => step.stepId !== id
+          );
+  
+          const updatedTask = { ...prevTask, steps: updatedSteps };
+  
+          return updatedTask;
+        });
+      } else {
+        console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+      }
+    };
     
 
     return (
@@ -142,9 +172,11 @@ const Steps = ({currentTask, setTask, setProject}) => {
                 <React.Fragment key={step.stepId}>
                 {
                 <li className="d-flex">
-                    <i style={{padding:"15px 10px 0 0"}}>•</i>
-                    <div className="bg-dark-medium  px-2 border-1 mt-2 rounded flex-grow-1" style={{fontSize:"10pt", paddingTop:"7px"}}>
-                      <p style={{marginBottom:"8px"}}>{step.content}</p>
+                     <button className="btn btn-sm btn-default deleteButton px-0" onClick={() => deleteStep(step.stepId)} style={{border:"none", transform:"translateY(4px) translateX(-8px)"}}>
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    <div className="bg-dark-medium  px-2 border-1 mt-2 rounded flex-grow-1 d-flex" style={{fontSize:"10pt", paddingTop:"7px"}}>
+                      <p className="flex-grow-1 text-break" style={{marginBottom:"8px"}}>{step.content}</p>
                     </div>
                     <Status currentStep={step} currentTask={step} setTask={setTask} setProject={setProject}/>
                 </li>

@@ -71,9 +71,9 @@ const Status = ( {currentTask, setTask, setProject} ) => {
         <div className="d-flex pt-2" style={{flexWrap:"nowrap", fontSize:"8pt"}}>
         {TaskStatusValues.map((status, index) => (
           <React.Fragment key={status}>
-            <div className="form-check form-check-inline flex-grow-1">
+            <label className="form-check-label form-check form-check-inline flex-grow-1 text-center d-flex flex-column align-items-center p-1 rounded" htmlFor={`status-${index}`} style={{border:"1px dashed grey", textDecoration:"underline", textDecorationStyle:"dotted" }} role="button">
               <input
-                className="form-check-input"
+                className="mx-1 form-check-input"
                 type="radio"
                 name="taskItemStatus"
                 id={`status-${index}`}
@@ -82,10 +82,8 @@ const Status = ( {currentTask, setTask, setProject} ) => {
                 onChange={() => handleStatusChange(index)}
                 role="button"
               />
-              <label className="form-check-label" htmlFor={`status-${index}`} style={{textDecoration:"underline", textDecorationStyle:"dotted"}} role="button">
-                {TaskStatusValues[index]}
-              </label>
-            </div>
+              {TaskStatusValues[index]}
+            </label>
           </React.Fragment>
         ))}
         </div>

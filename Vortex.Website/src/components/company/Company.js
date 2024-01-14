@@ -59,7 +59,9 @@ const Company = ({ company, setCompany, user }) => {
         {project != null ? (
           <Project project={project} setProject={setProject} currentTask={currentTask} setTask={setTask} currentCollaborator={collaborator} setCollaborator={setCurrentCollaborator} />
         ) : (
-          <>No project selected</>
+          <>
+            <div className="h-100 text-light text-center" style={{position:"absolute", top:"48%", left:"48%"}}>Zilch.</div>
+          </>
         )}
       </main>
     </div>

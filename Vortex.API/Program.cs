@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Vortex.API.Extensions;
+using Vortex.API.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +20,13 @@ builder.Services.AddControllers(options =>
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
-
+/*app.UseEndpoints(routes =>
+{
+    routes.MapHub<SyncronisationHub>("/SyncronisationHub");
+});*/
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

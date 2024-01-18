@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vortex.API.Data;
+using Vortex.API.Events;
 using Vortex.API.Models;
 using Vortex.API.Interfaces;
 using Vortex.API.Mappers;
+using Vortex.API.Services;
 
 namespace Vortex.API.Controllers
 {
@@ -16,13 +18,15 @@ namespace Vortex.API.Controllers
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
         private readonly ProjectMapper ProjectMapper;
+        private readonly ISyncronisationService SyncronisationService;
 
-        public ProjectController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, ProjectMapper projectMapper)
+        public ProjectController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, ProjectMapper projectMapper, ISyncronisationService syncronisationService)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
             ProjectMapper = projectMapper;
+            SyncronisationService = syncronisationService;
         }
 
         [HttpPost("new")]
@@ -66,6 +70,12 @@ namespace Vortex.API.Controllers
                     await Context.Entry(project)
                         .Collection(u => u.Tasks)
                         .LoadAsync();
+
+                    SyncronisationService.RaiseUserJoined(new UserJoinedEvent()
+                    {
+                        ConnectionId = HttpContext.Connection.Id,
+                        ProjectIdentifier = $"{project.Name}-{project.ProjectId}"
+                    });
 
                     return Ok(ProjectMapper.Map(project));
                 }

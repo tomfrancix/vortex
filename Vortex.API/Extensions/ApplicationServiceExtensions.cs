@@ -57,6 +57,7 @@ namespace Vortex.API.Extensions
             services.AddScoped<TokenService>();
 
             services.AddTransient<ICullingService, CullingService>();
+            services.AddTransient<ISyncronisationService, SyncronisationService>();
 
             services.AddControllersWithViews();
 

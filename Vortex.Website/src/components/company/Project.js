@@ -6,7 +6,6 @@ import TaskStatusEnum, { TaskStatusValues } from '../enum/TaskStatusEnum';
 
 const Project = ({project, setProject, currentTask, setTask, currentCollaborator, setCollaborator }) => {
   
-  console.log("loading Project Collaborator", currentCollaborator);
   useEffect(() => {
     console.log("current Project Collaborator", currentCollaborator);
 }, [currentCollaborator]);

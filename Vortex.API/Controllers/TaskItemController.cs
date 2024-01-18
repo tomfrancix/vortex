@@ -20,13 +20,15 @@ namespace Vortex.API.Controllers
         private readonly ApplicationDbContext Context;
         private readonly ICullingService CullingService;
         private readonly TaskMapper TaskMapper;
+        private readonly ProjectMapper ProjectMapper;
 
-        public TaskItemController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, TaskMapper taskMapper)
+        public TaskItemController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ICullingService cullingService, TaskMapper taskMapper, ProjectMapper projectMapper)
         {
             UserManager = userManager;
             Context = context;
             CullingService = cullingService;
             TaskMapper = taskMapper;
+            ProjectMapper = projectMapper;
         }
 
         [HttpPost("new")]
@@ -38,6 +40,10 @@ namespace Vortex.API.Controllers
 
                 var user = await UserManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
 
+                var newRank = project.Tasks is { Count: > 0 } 
+                    ? project.Tasks.OrderBy(t => t.Rank).Last().Rank + 1 
+                    : 0;
+
                 var taskItem = new TaskItem
                 {
                     Summary = model.Name,
@@ -45,6 +51,7 @@ namespace Vortex.API.Controllers
                     Creator = user.UserName,
                     Owner = "",
                     Status = TaskItemStatus.Requested,
+                    Rank = newRank,
                     ProjectId = project.ProjectId,
                     Project = project
                 };
@@ -158,16 +165,102 @@ namespace Vortex.API.Controllers
             return BadRequest(ModelState);
         }
 
+        [HttpPost("edit-rank")]
+        public async Task<IActionResult> EditRank([FromBody] EditTaskRankDescriptor model)
+        {
+            if (ModelState.IsValid)
+            {
+                var taskItem = Context.Tasks.Find(model.TaskItemId);
+
+                if (taskItem != null)
+                {               
+                    var project = Context.Projects.Include(p => p.Tasks).FirstOrDefault(p => p.ProjectId == taskItem.ProjectId);
+
+                    if (project == null) return BadRequest(ModelState);
+
+                    var oldRank = model.OldRank;
+                    var newRank = model.NewRank;
+
+                    // Swap ranks.
+                    if (Math.Abs(oldRank - newRank) == 1)
+                    {
+                        var otherTask = project.Tasks.FirstOrDefault(t => t.Rank == newRank);
+
+                        if (otherTask != null)
+                        {
+                            otherTask.Rank = oldRank;
+                            taskItem.Rank = newRank;
+                        }
+                    }
+                    // Increasing by more than one position.
+                    else if (oldRank < newRank && Math.Abs(oldRank - newRank) > 1)
+                    {
+                        var otherTasks = project.Tasks.Where(t => t.Rank > oldRank && t.Rank <= newRank);
+
+                        foreach (var otherTask in otherTasks)
+                        {
+                            otherTask.Rank--;
+                        }
+
+                        taskItem.Rank = newRank;
+                    }
+                    // Decreasing by more than one position.
+                    else if (oldRank > newRank && Math.Abs(oldRank - newRank) > 1)
+                    {
+                        var otherTasks = project.Tasks.Where(t => t.Rank < oldRank && t.Rank >= newRank);
+
+                        foreach (var otherTask in otherTasks)
+                        {
+                            otherTask.Rank++;
+                        }
+
+                        taskItem.Rank = newRank;
+                    }
+
+                    await Context.SaveChangesAsync();
+
+                    return Ok(ProjectMapper.Map(project));
+                }
+                else
+                {
+                    // Not found
+                    return NotFound();
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] int taskItemId)
         {
             if (ModelState.IsValid)
             {
-                var result = await CullingService.DeleteTask(taskItemId);
+                var taskItem = Context.Tasks.Find(taskItemId);
 
-                if (result > 0) { return Ok(result); }
+                if (taskItem != null)
+                {
+                    var project = Context.Projects.Include(p => p.Tasks)
+                        .FirstOrDefault(p => p.ProjectId == taskItem.ProjectId);
 
-                return NotFound();
+                    if (project == null) return BadRequest(ModelState);
+
+                    var otherTasks = project.Tasks.Where(t => t.Rank > taskItem.Rank);
+
+                    foreach (var otherTask in otherTasks)
+                    {
+                        otherTask.Rank--;
+                    }
+
+                    var result = await CullingService.DeleteTask(taskItemId);
+
+                    if (result > 0)
+                    {
+                        return Ok(result);
+                    }
+
+                    return NotFound();
+                }
             }
 
             return BadRequest(ModelState);

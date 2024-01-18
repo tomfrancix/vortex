@@ -30,7 +30,8 @@ namespace Vortex.API.Mappers
                 Description = entity.Description,
                 Creator = entity.Creator,
                 Owner = entity.Owner,
-                Status = entity.Status
+                Status = entity.Status,
+                Rank = entity.Rank
             };
 
             if (entity.Steps is { Count: > 0 })

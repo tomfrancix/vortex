@@ -83,6 +83,10 @@ namespace Vortex.API.Models
                 .WithOne(c => c.Task)
                 .HasForeignKey(c => c.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskItem>()
+                .Property(t => t.Rank)
+                .IsRequired();
         }
     }
 }

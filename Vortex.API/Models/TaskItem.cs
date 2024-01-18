@@ -43,6 +43,11 @@ public class TaskItem
     public int ProjectId { get; set; }
 
     /// <summary>
+    /// The task rank.
+    /// </summary>
+    public int Rank { get; set; }
+
+    /// <summary>
     /// The project.
     /// </summary>
     public Project Project { get; set; }

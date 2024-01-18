@@ -233,3 +233,15 @@ main {
     overflow-y: scroll;
   }
 }
+
+.dragging {
+  opacity: 0.5;
+  border: 2px dashed #ccc !important;
+  background-color:white;
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+button.btn, button.card, button.btn.btn-secondary, input[type="radio"], .card.task-card {
+  font-weight:bold;
+}

@@ -15,7 +15,6 @@ const Company = ({ company, setCompany, user }) => {
   const [currentTask, setCurrentTask] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  console.log('loading Company Collaborator', collaborator);
   const setTask = async (task) => {
     console.log(`Setting current task to ${task?.taskItemId}`)
     setCurrentTask(task);

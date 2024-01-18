@@ -40,6 +40,11 @@ public class TaskItemViewModel
     public string Owner { get; set; }
 
     /// <summary>
+    /// The task rank.
+    /// </summary>
+    public int Rank { get; set; }
+
+    /// <summary>
     /// The name of the user who created the task.
     /// </summary>
     public TaskItemStatus Status { get; set; }

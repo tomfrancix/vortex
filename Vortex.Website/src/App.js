@@ -5,7 +5,9 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import LandingPage from './components/LandingPage';
 import HomePage from './components/HomePage';
 import websiteData from './data.json';
-import './App.css'
+import './App.css';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -59,7 +61,9 @@ const App = () => {
         user?.isLoggedIn ? (
           // Authenticated Page
           <div>
-            <HomePage handleLogout={handleLogout} user={user} setUser={setUser} websiteData={websiteData} />
+            <DndProvider backend={HTML5Backend}>
+              <HomePage handleLogout={handleLogout} user={user} setUser={setUser} websiteData={websiteData} />
+            </DndProvider>
           </div>
         ) : (
           // Non-Authenticated Page

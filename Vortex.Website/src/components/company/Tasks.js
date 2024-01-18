@@ -5,6 +5,9 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import UseEnhancedLogger from '../debug/EnhancedLogger';
 import TaskStatusEnum, { TaskStatusValues } from '../enum/TaskStatusEnum';
 import ScrollableElement from './ScrollableElement';
+import { useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import DraggableTask from './task/DraggableTask';
 
 const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator }) => {
   const { debug, info, warn, error } = UseEnhancedLogger('Tasks');
@@ -138,6 +141,42 @@ const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator 
     },
   });
 
+  const moveTask = async (fromRank, toRank, taskItemId) => {
+
+    console.log(`Moving task from ${fromRank} to ${toRank} for task #${taskItemId}`);
+
+    var url = '/api/taskitem/edit-rank';
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({
+          taskItemId: taskItemId,
+          oldRank: fromRank,
+          newRank: toRank
+        })
+      });
+
+      if (response.ok) {
+        const project = await response.json();
+        console.log("Received new project and the reordered tasks:");
+        console.log(project);
+        setProject(project);
+  
+      } else {
+        error(`Failed to ${url.split('/').pop()}:${response.statusText}`);
+      }
+
+    } catch (ex) {
+        error(`Error ${url.split('/').pop()}:${ex}`);
+    }
+  };
+
   return (
     <div>
       <div className="p-1">
@@ -189,20 +228,11 @@ const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator 
                   {project
                     ?.tasks
                     ?.filter(task => task.status === index && (currentCollaborator != null ? (task.creator === currentCollaborator.userName || task.owner === currentCollaborator.userName) : task))
-                    .sort(t => t.rank)
+                    .sort((a, b) => a.rank - b.rank)
+                    .reverse()
                     .map((task, taskIndex) => (
                       <React.Fragment key={task.taskItemId}>
-                        {
-                          task?.taskItemId === currentTask?.taskItemId ? (
-                            <div type="submit" className="card text-light bg-dark-medium p-2 px-3 w-100 mt-2" style={{ textAlign: "left" }} >
-                              {task.summary}
-                            </div>
-                          ) : (
-                            <button type="submit" className="card bg-dark text-light p-2 px-3 w-100 mt-2" style={{ textAlign: "left" }} onClick={() => setTask(task)}>
-                              {task.summary}
-                            </button>
-                          )
-                        }
+                        <DraggableTask task={task} index={taskIndex} moveTask={moveTask} currentTask={currentTask} setTask={setTask} allTasks={project?.tasks}/>
                       </React.Fragment>
                     ))
                   }

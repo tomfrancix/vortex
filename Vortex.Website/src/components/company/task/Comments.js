@@ -68,45 +68,49 @@ const Comments = ({currentTask, setTask}) => {
         info(currentTask);
         info(formData);
         var url = '/api/comment/new';
-        
-        try {
-          const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            },
-            body: JSON.stringify(formData)
-          });
-    
-          if (response.ok) {
-            const data = await response.json();
-            if (currentTask.comments == null) {
-              currentTask.comments = [];
-            }
-            info(currentTask);
-            const updatedComments = [...currentTask.comments, data];
-            info(updatedComments);
-            setTask(currentTask => {
-              currentTask.comments = updatedComments;
-              info(currentTask);
-              return currentTask;
-            })
-            displayAddCommentForm(false);
-    
-            formikComments.resetForm();
+
+        if (formData.text.length > 0) {
+
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              mode: 'cors',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+              },
+              body: JSON.stringify(formData)
+            });
       
-          } else {
-            error(`Failed to ${url.split('/').pop()}:${response.statusText}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (currentTask.comments == null) {
+                currentTask.comments = [];
+              }
+              info(currentTask);
+              const updatedComments = [...currentTask.comments, data];
+              info(updatedComments);
+              setTask(currentTask => {
+                currentTask.comments = updatedComments;
+                info(currentTask);
+                return currentTask;
+              })
+              displayAddCommentForm(false);
+      
+              formikComments.resetForm();
+        
+            } else {
+              error(`Failed to ${url.split('/').pop()}:${response.statusText}`);
+            }
+      
+          } catch (ex) {
+              error(`Error ${url.split('/').pop()}:${ex}`);
           }
-    
-        } catch (ex) {
-            error(`Error ${url.split('/').pop()}:${ex}`);
         }
     };
 
     const formikComments = useFormik({
+      enableReinitialize: true, 
         initialValues: {
           taskItemId: currentTask.taskItemId,
           text: ''

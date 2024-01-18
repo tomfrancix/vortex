@@ -33,40 +33,42 @@ const ProjectLinks = ({company, setCompany, currentProject, setProject, setTask}
     const createProject = async (formData) => {
         var url = '/api/Project/new';
         
-        try {
-            const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(formData)
-            });
-        
-            if (response.ok) {
-            const data = await response.json();
-            data.tasks = [];
-            setTask(null);
-            setProject(data);
-            displayNewProjectForm(false);
-        
-            setCompany((prevCompany) => {
-                const updatedProjects = [...prevCompany.projects, data];
-        
-                const updatedCompany = { ...prevCompany, projects: updatedProjects };
-        
-                return updatedCompany;
-            });
+        if (formData.name.length > 0) {
+            try {
+                const response = await fetch(url, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+                });
+            
+                if (response.ok) {
+                const data = await response.json();
+                data.tasks = [];
+                setTask(null);
+                setProject(data);
+                displayNewProjectForm(false);
+            
+                setCompany((prevCompany) => {
+                    const updatedProjects = [...prevCompany.projects, data];
+            
+                    const updatedCompany = { ...prevCompany, projects: updatedProjects };
+            
+                    return updatedCompany;
+                });
 
-            formik.resetForm();
-            document.getElementById("statusRequested").click();
+                formik.resetForm();
+                document.getElementById("statusRequested").click();
 
-            } else {
-            console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+                } else {
+                console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+                }
+            } catch (error) {
+                console.error(`Error ${url.split('/').pop()}:`, error);
             }
-        } catch (error) {
-            console.error(`Error ${url.split('/').pop()}:`, error);
         }
     };
 

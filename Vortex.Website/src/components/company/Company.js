@@ -17,6 +17,7 @@ const Company = ({ company, setCompany, user }) => {
 
   console.log('loading Company Collaborator', collaborator);
   const setTask = async (task) => {
+    console.log(`Setting current task to ${task?.taskItemId}`)
     setCurrentTask(task);
   };
 

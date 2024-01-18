@@ -32,6 +32,7 @@ const CreateCompany = ({user, setCompany}) => {
     };
 
     const formik = useFormik({
+        enableReinitialize: true, 
         initialValues: {
             name: ''
         },

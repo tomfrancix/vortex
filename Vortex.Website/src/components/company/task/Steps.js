@@ -36,44 +36,47 @@ const Steps = ({currentTask, setTask, setProject}) => {
         info(formData);
         var url = '/api/step/new';
         
-        try {
-          const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            },
-            body: JSON.stringify(formData)
-          });
-    
-          if (response.ok) {
-            const data = await response.json();
-            if (currentTask.steps == null) {
-              currentTask.steps = [];
-            }
-            info(currentTask);
-            const updatedSteps = [...currentTask.steps, data];
-            info(updatedSteps);
-            setTask(currentTask => {
-              currentTask.steps = updatedSteps;
-              info(currentTask);
-              return currentTask;
-            })
-            displayStepForm(true, currentTask.steps, stepsInputRef);
-    
-            formikSteps.resetForm();
+        if (formData.content.length > 0) {
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              mode: 'cors',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+              },
+              body: JSON.stringify(formData)
+            });
       
-          } else {
-            error(`Failed to ${url.split('/').pop()}:${response.statusText}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (currentTask.steps == null) {
+                currentTask.steps = [];
+              }
+              info(currentTask);
+              const updatedSteps = [...currentTask.steps, data];
+              info(updatedSteps);
+              setTask(currentTask => {
+                currentTask.steps = updatedSteps;
+                info(currentTask);
+                return currentTask;
+              })
+              displayStepForm(true, currentTask.steps, stepsInputRef);
+      
+              formikSteps.resetForm();
+        
+            } else {
+              error(`Failed to ${url.split('/').pop()}:${response.statusText}`);
+            }
+      
+          } catch (ex) {
+              error(`Error ${url.split('/').pop()}:${ex}`);
           }
-    
-        } catch (ex) {
-            error(`Error ${url.split('/').pop()}:${ex}`);
         }
     };
 
     const formikSteps = useFormik({
+      enableReinitialize: true, 
         initialValues: {
           taskItemId: currentTask.taskItemId,
           content: ''

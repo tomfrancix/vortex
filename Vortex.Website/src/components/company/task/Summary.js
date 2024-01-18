@@ -33,6 +33,10 @@ const Summary = ( {currentTask, setTask, setProject} ) => {
       formData.field = document.querySelector('input[name="field"]')?.value 
     }
 
+    if (formData.field == "summary" && formData.value.length < 1) {
+      return;
+    }
+
     info(formData);
     try {
       const response = await fetch(url, {
@@ -73,22 +77,13 @@ const Summary = ( {currentTask, setTask, setProject} ) => {
   };
 
   const formikSummary = useFormik({
+    enableReinitialize: true, 
     initialValues: {
       taskItemId: currentTask.taskItemId
     },
     onSubmit: values => {
         info(values);
         
-        editTask(values);
-    },
-  });
-
-  const formikDescription = useFormik({
-    initialValues: {
-      taskItemId: currentTask.taskItemId
-    },
-    onSubmit: values => {
-        info(values);
         editTask(values);
     },
   });

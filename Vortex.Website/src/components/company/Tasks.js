@@ -86,42 +86,45 @@ const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator 
     info("function: createTask");
     var url = '/api/taskitem/new';
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(formData)
-      });
+    if (formData.name.length > 0 && formData.name.length < 1000) {
 
-      if (response.ok) {
-        const task = await response.json();
-        setTask(task);
-        displayNewTaskForm(false);
-
-        setProject((prevProject) => {
-
-          const updatedTasks = [...prevProject.tasks, task];
-
-          const updatedProject = { ...prevProject, tasks: updatedTasks };
-
-          info("updatedProject");
-          info(updatedProject);
-          return updatedProject;
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: JSON.stringify(formData)
         });
 
-        displayNewTaskForm(true);
+        if (response.ok) {
+          const task = await response.json();
+          setTask(task);
+          displayNewTaskForm(false);
 
-        formik.resetForm();
+          setProject((prevProject) => {
 
-      } else {
-        error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+            const updatedTasks = [...prevProject.tasks, task];
+
+            const updatedProject = { ...prevProject, tasks: updatedTasks };
+
+            info("updatedProject");
+            info(updatedProject);
+            return updatedProject;
+          });
+
+          displayNewTaskForm(true);
+
+          formik.resetForm();
+
+        } else {
+          error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+        }
+      } catch (error) {
+        error(`Error ${url.split('/').pop()}:`, error);
       }
-    } catch (error) {
-      error(`Error ${url.split('/').pop()}:`, error);
     }
   };
 
@@ -186,8 +189,7 @@ const Tasks = ({ project, setTask, setProject, currentTask, currentCollaborator 
                   {project
                     ?.tasks
                     ?.filter(task => task.status === index && (currentCollaborator != null ? (task.creator === currentCollaborator.userName || task.owner === currentCollaborator.userName) : task))
-                    .slice()
-                    .reverse()
+                    .sort(t => t.rank)
                     .map((task, taskIndex) => (
                       <React.Fragment key={task.taskItemId}>
                         {

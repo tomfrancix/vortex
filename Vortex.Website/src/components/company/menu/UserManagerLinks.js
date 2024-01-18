@@ -33,40 +33,52 @@ const UserManagerLinks = ({company, setCompany, currentCollaborator, setCollabor
           document.removeEventListener('click', handleOutsideClick);
         };
       }, [newCollaboratorFormIsVisible]);
+    
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
 
     const addCollaborator = async (formData) => {
         var url = '/api/Collaborator/add';
         
-        try {
-            const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(formData)
-            });
-        
-            if (response.ok) {
-            const data = await response.json();
-            displayNewCollaboratorForm(false);
-        
-            setCompany((prevCompany) => {
-                const updatedCollaborators = [...prevCompany.invitations, data];
-        
-                const updatedCompany = { ...prevCompany, invitations: updatedCollaborators };
-        
-                return updatedCompany;
-            });
+        if (formData.email.length > 0) {
+            if (isValidEmail(formData.email)) {
+                console.log("Valid email address!");
+                try {
+                    const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                    });
+                
+                    if (response.ok) {
+                    const data = await response.json();
+                    displayNewCollaboratorForm(false);
+                
+                    setCompany((prevCompany) => {
+                        const updatedCollaborators = [...prevCompany.invitations, data];
+                
+                        const updatedCompany = { ...prevCompany, invitations: updatedCollaborators };
+                
+                        return updatedCompany;
+                    });
 
-            formik.resetForm();
+                    formik.resetForm();
 
+                    } else {
+                        console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+                    }
+                } catch (error) {
+                    console.error(`Error ${url.split('/').pop()}:`, error);
+                }
             } else {
-                console.error(`Failed to ${url.split('/').pop()}:`, response.statusText);
+                console.log("Invalid email address");
             }
-        } catch (error) {
-            console.error(`Error ${url.split('/').pop()}:`, error);
         }
     };
 

@@ -75,6 +75,7 @@ const Description = ( {currentTask, setTask, setProject} ) => {
   };
 
   const formikDescription = useFormik({
+    enableReinitialize: true, 
     initialValues: {
       taskItemId: currentTask.taskItemId
     },
